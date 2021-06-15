@@ -5,8 +5,8 @@ from copy import deepcopy
 
 def easy(ttt):
     '''
-    Easy difficulty AI. Chooses at random but will block a player win and
-    play a winning move.
+    Easy difficulty AI. Chooses moves at random but it will block a players win
+    and play a winning move whenever possible.
     '''
     posMoves = ttt.possibleMoves()
 
@@ -22,26 +22,26 @@ def finalMove(ttt, posMoves):
     every possible move for player and check if player wins. If player can win
     then play that move with AI to block win.
     '''
-    for i in posMoves:
-        ttt.move(int(i[0]), int(i[1]))
+    for pos in posMoves:
+        ttt.move(int(pos[0]), int(pos[1]))
 
         if ttt.checkForWinner() == 'O':
             return 1
 
-        ttt.move(int(i[0]), int(i[1]))
+        ttt.move(int(pos[0]), int(pos[1]))
 
         if ttt.checkForWinner() == 'X':
-            ttt.undo(int(i[0]), int(i[1]))
-            ttt.move(int(i[0]), int(i[1]))
+            ttt.undo(int(pos[0]), int(pos[1]))
+            ttt.move(int(pos[0]), int(pos[1]))
             return 1
 
-        ttt.undo(int(i[0]), int(i[1]))
+        ttt.undo(int(pos[0]), int(pos[1]))
 
 def medium(ttt):
     '''
-    Medium difficulty AI. Block player win and play winning move. Else if center
-    is free, plays in center. Then plays random corner and if all corners
-    are full, plays a random edge.
+    Medium difficulty AI. Blocks the players winning move and it will play a
+    winning move whenever possible. Else if center is free, plays in center.
+    Then plays random corner and if all corners are full, plays a random edge.
     '''
     posMoves = ttt.possibleMoves()
 
@@ -63,9 +63,9 @@ def moveCorner(ttt, posMoves):
     corners are found, return 0.
     '''
     freeCorners = []
-    for i in posMoves:
-        if i in [(0,0), (0,2), (2,0), (2,2)]:
-            freeCorners.append(i)
+    for pos in posMoves:
+        if pos in [(0,0), (0,2), (2,0), (2,2)]:
+            freeCorners.append(pos)
 
     if len(freeCorners) > 0:
         move = random.choice(freeCorners)
@@ -80,9 +80,9 @@ def moveEdge(ttt, posMoves):
     edges are found, return 0.
     '''
     freeEdges = []
-    for i in posMoves:
-        if i in [(1,0), (0,1), (2,1), (1,2)]:
-            freeEdges.append(i)
+    for pos in posMoves:
+        if pos in [(1,0), (0,1), (2,1), (1,2)]:
+            freeEdges.append(pos)
 
     if len(freeEdges) > 0:
         move = random.choice(freeEdges)
@@ -109,14 +109,14 @@ def hard(ttt):
 
     # Copy board, try move, recursively finish game and determine score.
     # Best scoring move gets played.
-    for i in posMoves:
+    for pos in posMoves:
         tttcopy = deepcopy(ttt)
-        tttcopy.move(int(i[0]), int(i[1]))
+        tttcopy.move(int(pos[0]), int(pos[1]))
         score = minimax(tttcopy, False)
-        tttcopy.undo(int(i[0]), int(i[1]))
+        tttcopy.undo(int(pos[0]), int(pos[1]))
         if score > bestScore:
             bestScore = score
-            bestMove = i
+            bestMove = pos
 
     ttt.move(bestMove[0], bestMove[1])
 
@@ -137,22 +137,22 @@ def minimax(ttt, maximize):
     if maximize:
         bestScore = -2
         posMoves = ttt.possibleMoves()
-        for i in posMoves:
+        for pos in posMoves:
             tttcopy = deepcopy(ttt)
-            tttcopy.move(int(i[0]), int(i[1]))
+            tttcopy.move(int(pos[0]), int(pos[1]))
             score = minimax(tttcopy, False)
-            tttcopy.undo(int(i[0]), int(i[1]))
+            tttcopy.undo(int(pos[0]), int(pos[1]))
             if score > bestScore:
                 bestScore = score
         return bestScore
     else:
         bestScore = 2
         posMoves = ttt.possibleMoves()
-        for i in posMoves:
+        for pos in posMoves:
             tttcopy = deepcopy(ttt)
-            tttcopy.move(int(i[0]), int(i[1]))
+            tttcopy.move(int(pos[0]), int(pos[1]))
             score = minimax(tttcopy, True)
-            tttcopy.undo(int(i[0]), int(i[1]))
+            tttcopy.undo(int(pos[0]), int(pos[1]))
             if score < bestScore:
                 bestScore = score
         return bestScore
