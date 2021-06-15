@@ -3,8 +3,9 @@ import numpy
 
 PLAYERS = ["X", "O"]
 
+
 class TicTacToe:
-    def start(self, turn = None, board = None):
+    def start(self, turn=None, board=None):
         '''
         Setup for game.
         '''
@@ -51,10 +52,10 @@ class TicTacToe:
         '''
         posMoves = []
 
-        for x in range(0,3):
-            for y in range(0,3):
+        for x in range(0, 3):
+            for y in range(0, 3):
                 if self.board[x][y] == ' ':
-                    posMoves.append((y,x))
+                    posMoves.append((y, x))
         return posMoves
 
     def freePos(self, x, y):
