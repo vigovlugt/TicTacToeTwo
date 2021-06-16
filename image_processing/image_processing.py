@@ -2,8 +2,6 @@ import cv2
 import numpy as np
 from PIL import Image
 import math
-import time
-import matplotlib.pyplot as plt
 
 
 def get_tictactoe_from_image(image):
@@ -19,7 +17,7 @@ def get_tictactoe_from_image(image):
     shapes = []
     for contour in contours:
         approx = cv2.approxPolyDP(
-        contour, 0.02 * cv2.arcLength(contour, True), True)
+            contour, 0.02 * cv2.arcLength(contour, True), True)
 
         contour = approx
 
@@ -52,7 +50,8 @@ def get_tictactoe_from_image(image):
     img_contours = cv2.resize(img_contours, (100, 100))
 
     edges = cv2.Canny(img_contours, 75, 150)
-    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 30, maxLineGap=300, minLineLength=80)
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 30,
+                            maxLineGap=300, minLineLength=80)
 
     detec_lines = np.zeros(image.shape[0:2])
     lines = [line[0] for line in lines]
@@ -63,9 +62,9 @@ def get_tictactoe_from_image(image):
         x1, y1, x2, y2 = 8*x1, 8*y1, 8*x2, 8*y2
         new_lines.append([x1, y1, x2, y2])
         cv2.line(contour_image, (x1, y1), (x2, y2), (255, 255, 0), 10)
-    
+
     board = get_board(new_lines, shapes)
-    print(board)
+    print_board(board)
 
     image_show(contour_image)
     # cv2.imshow("title", contour_image)
@@ -75,10 +74,10 @@ def get_tictactoe_from_image(image):
 def get_line_orientation(line):
     x1, y1, x2, y2 = line
 
-    if (y2-y1) == 0:
+    if (x2-x1) == 0:
         return "VERTICAL"
 
-    a = (x2-x1) / (y2-y1)
+    a = (y2-y1)/(x2-x1)
     if a > 1 or a < -1:
         return "VERTICAL"
     return "HORIZONTAL"
@@ -104,26 +103,32 @@ def get_relative_position(num, nums):
 
 
 def get_board(lines, shapes):
-    board = [[None,None,None],[None,None,None],[None,None,None]]
+    board = [[None, None, None], [None, None, None], [None, None, None]]
 
-    vertical_lines = [line for line in lines if get_line_orientation(line) == "VERTICAL"]
-    horizontal_lines = [line for line in lines if get_line_orientation(line) == "HORIZONTAL"]
+    vertical_lines = [
+        line for line in lines if get_line_orientation(line) == "VERTICAL"]
+    horizontal_lines = [
+        line for line in lines if get_line_orientation(line) == "HORIZONTAL"]
     line_ys = sorted([get_line_average_y(line) for line in horizontal_lines])
     line_xs = sorted([get_line_average_x(line) for line in vertical_lines])
 
     for shape_tuple in shapes:
-        shape,x,y = shape_tuple
+        shape, x, y = shape_tuple
         board_y = get_relative_position(y, line_ys)
-        board_x = get_relative_position(x, line_xs)
+        board_x = 2 - get_relative_position(x, line_xs)
         board[board_x][board_y] = shape
 
     return board
 
 
 def print_board(board):
-    for x in range(3):
-        for y in range(3):
-            print(board[board_x][board_y])
+    for y in range(3):
+        for x in range(3):
+            if board[x][y] is not None:
+                print(board[x][y], end="")
+            else:
+                print(" ", end="")
+        print()
 
 
 def get_object_shape(solidity, approx):
@@ -172,7 +177,8 @@ def same_line(line1, line2):
     (x12, y12, x22, y22) = line2
     rc_line2 = abs(y12 - y22) / abs(x12 - x22)
 
-    print(rc_line1, rc_line2, math.degrees(np.arctan(rc_line1)), math.degrees(np.arctan(rc_line2)))
+    print(rc_line1, rc_line2, math.degrees(np.arctan(rc_line1)),
+          math.degrees(np.arctan(rc_line2)))
 
 
 def line_length(x1, y1, x2, y2):
@@ -188,16 +194,7 @@ def merge_lines(lines):
     return lines
 
 
-def main():
-    cap = cv2.VideoCapture(0)
-    while True:
-        ret, frame = cap.read()
-        plt.imshow(frame)
-        time.sleep(1)
-
-
 if __name__ == "__main__":
-    # image = cv2.imread("./assets/4.png")
-    # image = cv2.resize(image, (800, 800))
-    # get_tictactoe_from_image(image)
-    main()
+    image = cv2.imread("./assets/4.png")
+    image = cv2.resize(image, (800, 800))
+    get_tictactoe_from_image(image)
