@@ -30,7 +30,7 @@ def get_tictactoe_from_image(image):
         solidity = area / float(hullArea)
 
         shape = get_object_shape(solidity, approx)
-        print(shape, solidity)
+        # print(shape, solidity)
 
         middle = cv2.moments(contour)
         center_x = middle["m10"] / middle["m00"]
@@ -64,9 +64,10 @@ def get_tictactoe_from_image(image):
         cv2.line(contour_image, (x1, y1), (x2, y2), (255, 255, 0), 10)
 
     board = get_board(new_lines, shapes)
-    print_board(board)
 
-    image_show(contour_image)
+    image_show(contour_image) # For testing
+    return board
+
     # cv2.imshow("title", contour_image)
     # cv2.waitKey()
 
@@ -112,8 +113,7 @@ def get_board(lines, shapes):
     line_ys = sorted([get_line_average_y(line) for line in horizontal_lines])
     line_xs = sorted([get_line_average_x(line) for line in vertical_lines])
 
-    for shape_tuple in shapes:
-        shape, x, y = shape_tuple
+    for shape, x, y in shapes:
         board_y = get_relative_position(y, line_ys)
         board_x = 2 - get_relative_position(x, line_xs)
         board[board_x][board_y] = shape
@@ -193,8 +193,10 @@ def merge_lines(lines):
         same_line(line, lines[0])
     return lines
 
-
-if __name__ == "__main__":
-    image = cv2.imread("./assets/4.png")
+def get_photo():
+    '''
+    Get photo from camera stream.
+    '''
+    image = cv2.imread("./image_processing/assets/4.png") # For testing
     image = cv2.resize(image, (800, 800))
-    get_tictactoe_from_image(image)
+    return image
