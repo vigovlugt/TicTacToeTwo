@@ -1,4 +1,6 @@
 from random import choice
+
+from PIL.Image import NONE
 import numpy
 
 PLAYERS = ["X", "O"]
@@ -21,15 +23,16 @@ class TicTacToe:
         if board:
             self.board = board
         else:
-            self.board = [[" "] * 3 for _ in range(3)]
+            self.board = [[None] * 3 for _ in range(3)]
 
     def printBoard(self):
         '''
         Prints current board.
         '''
         print("\nTurn:", self.turn, end="\n\n")
+        board = [[i if i else " " for i in j] for j in self.board]
         print("\n---+---+---\n".join([" " + " | ".join(row)
-                                      for row in self.board]))
+                                      for row in board]))
 
     def move(self, x, y):
         '''
@@ -54,7 +57,7 @@ class TicTacToe:
 
         for x in range(0, 3):
             for y in range(0, 3):
-                if self.board[x][y] == ' ':
+                if self.board[x][y] == None:
                     posMoves.append((y, x))
         return posMoves
 
@@ -70,6 +73,15 @@ class TicTacToe:
         else:
             return 0
 
+    def cmpBoard(self, board):
+        for y in range(0,3):
+            for x in range(0,3):
+                if board[y][x] == 'X' and self.board[y][x] == None:
+                    self.move(x, y)
+                    return True
+        return False
+
+
     def checkForWinner(self):
         '''
         Check if a player has won. Returns symbol of winning player. If
@@ -81,11 +93,11 @@ class TicTacToe:
                 [[self.board[i][2 - i] for i in range(3)]])
 
         for row in rows:
-            if row[0] == row[1] == row[2] != " ":
+            if row[0] == row[1] == row[2] != None:
                 # After move, turns change, so winner is last turns player.
                 if self.turn == 'O':
                     return 'X'
                 elif self.turn == 'X':
                     return 'O'
 
-        return None if " " in numpy.array(self.board).flatten() else "tie"
+        return None if None in numpy.array(self.board).flatten() else "tie"
