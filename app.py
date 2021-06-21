@@ -12,7 +12,6 @@ class Application:
 
         args = sys.argv
 
-        print(args, len(args))
         # Choose AI difficulty.
         diff = args[1] if len(args) == 3 else input(
             "\nChoose AI difficulty (1: Easy, 2: Medium, 3: Hard): ")

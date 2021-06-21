@@ -31,9 +31,10 @@ class MainThread(QThread):
             time.sleep(1/FPS)
 
             ret, frame = cap.read()
-            self.set_image_in_gui(ret, frame)
 
+            self.set_image_in_gui(ret, frame)
             self.set_debug_image_in_gui(ret, frame)
+
             self.app.update(frame)
 
     def set_image_in_gui(self, ret, frame):
