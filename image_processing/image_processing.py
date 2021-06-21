@@ -4,8 +4,8 @@ from PIL import Image
 import math
 
 
-def get_tictactoe_from_image(preprocessed_image):
-    image = preprocessed_image
+def get_tictactoe_from_image(image):
+    preprocessed_image = preprocess_image(image)
 
     contours = cv2.findContours(
         preprocessed_image.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0]
@@ -16,10 +16,8 @@ def get_tictactoe_from_image(preprocessed_image):
 
     shapes = []
     for contour in contours:
-        approx = cv2.approxPolyDP(
+        contour = cv2.approxPolyDP(
             contour, 0.02 * cv2.arcLength(contour, True), True)
-
-        contour = approx
 
         area = cv2.contourArea(contour)
         hull = cv2.convexHull(contour)
@@ -29,7 +27,7 @@ def get_tictactoe_from_image(preprocessed_image):
             continue
         solidity = area / float(hullArea)
 
-        shape = get_object_shape(solidity, approx)
+        shape = get_object_shape(solidity, contour)
         # print(shape, solidity)
 
         middle = cv2.moments(contour)
@@ -55,10 +53,10 @@ def get_tictactoe_from_image(preprocessed_image):
 
     edges = cv2.Canny(img_contours, 75, 150)
     lines = cv2.HoughLinesP(edges, 1, np.pi/180, 30,
-                            maxLineGap=300, minLineLength=80)
-
+                            maxLineGap=300, minLineLength=50)
+    print(lines)
     if lines is None:
-        return None
+        return None, contour_image
 
     lines = [line[0] for line in lines]
     new_lines = []
@@ -72,7 +70,7 @@ def get_tictactoe_from_image(preprocessed_image):
     board = get_board(new_lines, shapes)
 
     # image_show(contour_image)  # For testing
-    return board
+    return board, contour_image
 
 
 def get_line_orientation(line):

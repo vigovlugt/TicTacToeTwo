@@ -18,6 +18,7 @@ FPS = 10
 class MainThread(QThread):
     changePixmap = pyqtSignal(QImage)
     changeDebugPixmap = pyqtSignal(QImage)
+    changeContourPixmap = pyqtSignal(QImage)
 
     def __init__(self, qt_instance, app):
         super().__init__(qt_instance)
@@ -31,11 +32,14 @@ class MainThread(QThread):
             time.sleep(1/FPS)
 
             ret, frame = cap.read()
+            frame = frame[100: 380, 150:490]
 
             self.set_image_in_gui(ret, frame)
             self.set_debug_image_in_gui(ret, frame)
 
-            self.app.update(frame)
+            contour_image = self.app.update(frame)
+
+            self.set_contour_image_in_gui(ret, contour_image)
 
     def set_image_in_gui(self, ret, frame):
         if ret:
@@ -60,6 +64,19 @@ class MainThread(QThread):
             p = convertToQtFormat.scaled(h, w, Qt.KeepAspectRatio)
             self.changeDebugPixmap.emit(p)
 
+    def set_contour_image_in_gui(self, ret, frame):
+        if ret:
+            h, w, ch = frame.shape
+            rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            bytesPerLine = w * ch
+
+            convertToQtFormat = QImage(
+                rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
+            p = convertToQtFormat.scaled(h, w, Qt.KeepAspectRatio)
+            self.changeContourPixmap.emit(p)
+
+
+
 
 class GUI(QMainWindow):
     def __init__(self, *args):
@@ -72,6 +89,7 @@ class GUI(QMainWindow):
 
         th.changePixmap.connect(self.setImage)
         th.changeDebugPixmap.connect(self.setDebugImage)
+        th.changeContourPixmap.connect(self.setContourImage)
         th.start()
 
     def setImage(self, image):
@@ -79,6 +97,9 @@ class GUI(QMainWindow):
 
     def setDebugImage(self, image):
         self.debug_image_display.setPixmap(QPixmap.fromImage(image))
+
+    def setContourImage(self, image):
+        self.contour_image_display.setPixmap(QPixmap.fromImage(image))
 
 
 if __name__ == "__main__":

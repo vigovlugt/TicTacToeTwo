@@ -30,21 +30,19 @@ class Application:
             self.ttt.start('O')
 
     def update(self, image):
-        image = ip.preprocess_image(image)
-
         is_locked = self.motion_detector.process_image(image)
 
         if is_locked:
             print("Image has moved in last second, app locked")
-            return
+            return image
 
-        board = ip.get_tictactoe_from_image(image)
+        board, contour_image = ip.get_tictactoe_from_image(image)
         if board is None:
             print("No board detected")
-            return
+            return contour_image
 
         if self.ttt.legalMoveSet(board):
             print("Legal move is set on the board")
             ip.print_board(board)
             ai.aiMove(ttt, diff)
-            return
+            return contour_image
