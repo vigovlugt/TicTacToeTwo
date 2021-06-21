@@ -32,7 +32,7 @@ class MainThread(QThread):
             time.sleep(1/FPS)
 
             ret, frame = cap.read()
-            frame = frame[100: 380, 150:490]
+            frame = frame[100:380, 180:460]
 
             self.set_image_in_gui(ret, frame)
             self.set_debug_image_in_gui(ret, frame)

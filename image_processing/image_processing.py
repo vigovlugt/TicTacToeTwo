@@ -12,7 +12,9 @@ def get_tictactoe_from_image(image):
 
     contour_image = image.copy()
 
-    img_contours = np.zeros(image.shape[0:2])
+    field_image = preprocessed_image.copy()
+
+    # img_contours = np.zeros((100, 100))
 
     shapes = []
     for contour in contours:
@@ -40,20 +42,24 @@ def get_tictactoe_from_image(image):
 
         if shape == "O":
             shapes.append((shape, center_x, center_y))
-            cv2.drawContours(contour_image, [contour], 0, (0, 0, 255), 3)
+            # cv2.drawContours(contour_image, [contour], 0, (0, 0, 255), 3)
+            cv2.drawContours(field_image, [contour], 0, 0, 3)
         elif shape == "X":
             shapes.append((shape, center_x, center_y))
-            cv2.drawContours(contour_image, [contour], 0, (0, 255, 0), 3)
+            # cv2.drawContours(contour_image, [contour], 0, (0, 255, 0), 3)
+            cv2.drawContours(field_image, [contour], 0, 0, 3)
         else:
-            cv2.drawContours(contour_image, [contour], 0, (255, 0, 0), 3)
-            cv2.drawContours(img_contours, [contour], 0, 255, 30)
+            pass
+            # cv2.drawContours(contour_image, [contour], 0, (255, 0, 0), 3)
 
-    img_contours = np.uint8(img_contours)
-    img_contours = cv2.resize(img_contours, (100, 100))
+    resized_image = cv2.resize(field_image,
+                               (field_image.shape[0] // 5,
+                                field_image.shape[1] // 5))
 
-    edges = cv2.Canny(img_contours, 75, 150)
+    edges = cv2.Canny(resized_image, 75, 150)
     lines = cv2.HoughLinesP(edges, 1, np.pi/180, 30,
-                            maxLineGap=300, minLineLength=50)
+                            maxLineGap=300,
+                            minLineLength=resized_image.shape[0]/2)
     print(lines)
     if lines is None:
         return None, contour_image
@@ -63,9 +69,9 @@ def get_tictactoe_from_image(image):
 
     for line in lines:
         x1, y1, x2, y2 = line
-        x1, y1, x2, y2 = 8*x1, 8*y1, 8*x2, 8*y2
         new_lines.append([x1, y1, x2, y2])
-        cv2.line(contour_image, (x1, y1), (x2, y2), (255, 255, 0), 10)
+        cv2.line(contour_image, (x1 * 5, y1 * 5),
+                                (x2 * 5, y2 * 5), (255, 255, 0), 10)
 
     board = get_board(new_lines, shapes)
 
@@ -150,8 +156,9 @@ def get_object_shape(solidity, approx):
 def preprocess_image(image):
     gray_scale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blurred_image = cv2.GaussianBlur(gray_scale_image, (5, 5), 0)
+    threshold = np.bincount(gray_scale_image.flatten()).argmax() * 0.75
     filtered_image = cv2.threshold(
-        blurred_image, 128, 255, cv2.THRESH_BINARY)[1]
+        blurred_image, threshold, 255, cv2.THRESH_BINARY)[1]
     inverted_image = (255-filtered_image)
 
     return inverted_image
