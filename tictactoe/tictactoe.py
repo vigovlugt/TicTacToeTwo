@@ -73,14 +73,13 @@ class TicTacToe:
         else:
             return 0
 
-    def cmpBoard(self, board):
-        for y in range(0,3):
-            for x in range(0,3):
+    def equal(self, board):
+        for y in range(0, 3):
+            for x in range(0, 3):
                 if board[y][x] == 'X' and self.board[y][x] == None:
                     self.move(x, y)
                     return True
         return False
-
 
     def checkForWinner(self):
         '''

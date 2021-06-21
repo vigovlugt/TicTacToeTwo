@@ -4,8 +4,8 @@ from PIL import Image
 import math
 
 
-def get_tictactoe_from_image(image):
-    preprocessed_image = preprocess_image(image)
+def get_tictactoe_from_image(preprocessed_image):
+    image = preprocessed_image
 
     contours = cv2.findContours(
         preprocessed_image.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0]
@@ -33,6 +33,10 @@ def get_tictactoe_from_image(image):
         # print(shape, solidity)
 
         middle = cv2.moments(contour)
+        if middle["m00"] == 0 or middle["m00"] == 0:
+            # print("WARN: zero division error")
+            continue
+
         center_x = middle["m10"] / middle["m00"]
         center_y = middle["m01"] / middle["m00"]
 
@@ -53,7 +57,9 @@ def get_tictactoe_from_image(image):
     lines = cv2.HoughLinesP(edges, 1, np.pi/180, 30,
                             maxLineGap=300, minLineLength=80)
 
-    detec_lines = np.zeros(image.shape[0:2])
+    if lines is None:
+        return None
+
     lines = [line[0] for line in lines]
     new_lines = []
 
@@ -65,11 +71,8 @@ def get_tictactoe_from_image(image):
 
     board = get_board(new_lines, shapes)
 
-    image_show(contour_image) # For testing
+    # image_show(contour_image)  # For testing
     return board
-
-    # cv2.imshow("title", contour_image)
-    # cv2.waitKey()
 
 
 def get_line_orientation(line):
@@ -110,13 +113,17 @@ def get_board(lines, shapes):
         line for line in lines if get_line_orientation(line) == "VERTICAL"]
     horizontal_lines = [
         line for line in lines if get_line_orientation(line) == "HORIZONTAL"]
+
+    if len(vertical_lines) != 2 or len(horizontal_lines) != 2:
+        return None
+
     line_ys = sorted([get_line_average_y(line) for line in horizontal_lines])
     line_xs = sorted([get_line_average_x(line) for line in vertical_lines])
 
     for shape, x, y in shapes:
         board_y = get_relative_position(y, line_ys)
         board_x = 2 - get_relative_position(x, line_xs)
-        board[board_x][board_y] = shape
+        board[board_y][board_x] = shape
 
     return board
 
@@ -124,8 +131,8 @@ def get_board(lines, shapes):
 def print_board(board):
     for y in range(3):
         for x in range(3):
-            if board[x][y] is not None:
-                print(board[x][y], end="")
+            if board[y][x] is not None:
+                print(board[y][x], end="")
             else:
                 print(" ", end="")
         print()
@@ -193,10 +200,11 @@ def merge_lines(lines):
         same_line(line, lines[0])
     return lines
 
+
 def get_photo():
     '''
     Get photo from camera stream.
     '''
-    image = cv2.imread("./image_processing/assets/4.png") # For testing
+    image = cv2.imread("./image_processing/assets/4.png")  # For testing
     image = cv2.resize(image, (800, 800))
     return image

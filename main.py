@@ -1,49 +1,87 @@
-from tictactoe import ai
-from tictactoe.tictactoe import TicTacToe
 import image_processing.image_processing as ip
+from app import Application
+import time
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtCore import QThread, Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtWidgets import QApplication
+import cv2
+import sys
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import *
+from PyQt5.uic import loadUi
+import matplotlib
+matplotlib.use("Qt5Agg")
+
+FPS = 10
 
 
-def main():
-    '''
-    Contains configuration for AI difficulty and who goes first. Then
-    enters game loop until winner or tie is determined.
-    '''
-    ttt = TicTacToe()
+class MainThread(QThread):
+    changePixmap = pyqtSignal(QImage)
+    changeDebugPixmap = pyqtSignal(QImage)
 
-    # Choose AI difficulty.
-    diff = input("\nChoose AI difficulty (1: Easy, 2: Medium, 3: Hard): ")
-    while diff != '1' and diff != '2' and diff != '3':
-        diff = input("Please try again (1: Easy, 2: Medium, 3: Hard): ")
+    def __init__(self, qt_instance, app):
+        super().__init__(qt_instance)
+        self.app = app
 
-    # Choose starting player.
-    first = input("Go first? [y/n]: ").lower()
-    while first != 'y' and first != 'n':
-        first = input("Please try again [y/n]: ").lower()
+    def run(self):
+        # Setup video capture source
+        cap = cv2.VideoCapture(0)
 
-    if first == 'y':
-        ttt.start('X')
-    elif first == 'n':
-        ttt.start('O')
+        while True:
+            time.sleep(1/FPS)
 
-    # Game loop.
-    while ttt.checkForWinner() is None:
-        ttt.printBoard()
-        if ttt.turn == 'X': # Player turn
+            ret, frame = cap.read()
+            self.set_image_in_gui(ret, frame)
 
-            # Loop until board in image is different
-            # than current board.
-            while True:
-                img =  ip.get_photo()
-                board = ip.get_tictactoe_from_image(img)
-                if ttt.cmpBoard(board):
-                    break
-        else: # AI turn
-            ai.aiMove(ttt, diff)
+            self.set_debug_image_in_gui(ret, frame)
+            self.app.update(frame)
 
-    # Print final board and show result.
-    ttt.printBoard()
-    ai.result(ttt)
+    def set_image_in_gui(self, ret, frame):
+        if ret:
+            h, w, ch = frame.shape
+            rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            bytesPerLine = ch * w
+
+            convertToQtFormat = QImage(
+                rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
+            p = convertToQtFormat.scaled(h, w, Qt.KeepAspectRatio)
+            self.changePixmap.emit(p)
+
+    def set_debug_image_in_gui(self, ret, frame):
+        im = ip.preprocess_image(frame)
+
+        if ret:
+            h, w = im.shape
+            bytesPerLine = w
+
+            convertToQtFormat = QImage(
+                im.data, w, h, bytesPerLine, QImage.Format_Grayscale8)
+            p = convertToQtFormat.scaled(h, w, Qt.KeepAspectRatio)
+            self.changeDebugPixmap.emit(p)
 
 
-if __name__ == '__main__':
-    main()
+class GUI(QMainWindow):
+    def __init__(self, *args):
+        QMainWindow.__init__(self)
+        window = loadUi("gui/TicTacToe.ui", self)
+        self.setWindowTitle("TicTacToe")
+
+        app = Application()
+        th = MainThread(self, app)
+
+        th.changePixmap.connect(self.setImage)
+        th.changeDebugPixmap.connect(self.setDebugImage)
+        th.start()
+
+    def setImage(self, image):
+        self.image_display.setPixmap(QPixmap.fromImage(image))
+
+    def setDebugImage(self, image):
+        self.debug_image_display.setPixmap(QPixmap.fromImage(image))
+
+
+if __name__ == "__main__":
+    app = QApplication([])
+    form = GUI()
+    form.show()
+    sys.exit(app.exec_())
