@@ -73,7 +73,10 @@ class TicTacToe:
         else:
             return 0
 
-    def equal(self, board):
+    def legalMoveSet(self, board):
+        '''
+        Checks if one legal move is set and executes this move if so.
+        '''
         for y in range(0, 3):
             for x in range(0, 3):
                 if board[y][x] == 'X' and self.board[y][x] == None:

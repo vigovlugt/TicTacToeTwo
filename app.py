@@ -43,8 +43,8 @@ class Application:
             print("No board detected")
             return
 
-        if self.ttt.equal(board):
-            print("Board is still equal")
+        if self.ttt.legalMoveSet(board):
+            print("Legal move is set on the board")
+            ip.print_board(board)
+            ai.aiMove(ttt, diff)
             return
-
-        ip.print_board(board)
