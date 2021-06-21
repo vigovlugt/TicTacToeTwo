@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1800</width>
-    <height>671</height>
+    <height>644</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,8 +47,8 @@
    <widget class="QComboBox" name="comboBox_2">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>540</y>
+      <x>140</x>
+      <y>550</y>
       <width>86</width>
       <height>25</height>
      </rect>
@@ -67,8 +67,8 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>80</x>
-      <y>580</y>
+      <x>30</x>
+      <y>590</y>
       <width>89</width>
       <height>25</height>
      </rect>
@@ -80,8 +80,8 @@
    <widget class="QTextEdit" name="textEdit_2">
     <property name="geometry">
      <rect>
-      <x>80</x>
-      <y>540</y>
+      <x>30</x>
+      <y>550</y>
       <width>104</width>
       <height>31</height>
      </rect>
@@ -97,8 +97,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QComboBox" name="comboBox">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>510</y>
+      <x>140</x>
+      <y>520</y>
       <width>86</width>
       <height>25</height>
      </rect>
@@ -122,8 +122,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QTextEdit" name="textEdit">
     <property name="geometry">
      <rect>
-      <x>80</x>
-      <y>510</y>
+      <x>30</x>
+      <y>520</y>
       <width>104</width>
       <height>31</height>
      </rect>

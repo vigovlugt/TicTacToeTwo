@@ -127,6 +127,8 @@ class GUI(QMainWindow):
 
             self.th.changePixmap.connect(self.setImage)
             self.th.changeDebugPixmap.connect(self.setDebugImage)
+            self.th.changeContourPixmap.connect(self.setContourImage)
+
             self.th.start()
         else:
             # Open new subprocess, stop thread and exit.
