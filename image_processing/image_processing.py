@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 from PIL import Image
-import math
-import time
 
 
 def get_board_lines(image: np.array, shapes: list,
@@ -10,7 +8,7 @@ def get_board_lines(image: np.array, shapes: list,
                     max_gap: int = 30) -> list:
 
     board_image = image.copy()
-    debug_image = np.zeros(image.shape)
+    # debug_image = np.zeros(image.shape)
 
     for (shape, _, contour) in shapes:
         if shape in ['X', 'O']:
@@ -34,7 +32,6 @@ def get_board_lines(image: np.array, shapes: list,
 
     approved = merge_lines(math_lines)
     # print('app:', len(approved), 'all:', len(lines))
-
 
     # for x1, y1, x2, y2 in approved:
     #     cv2.line(debug_image, (x1, y1), (x2, y2), np.random.randint(200), 1)

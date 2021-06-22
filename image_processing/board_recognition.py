@@ -1,6 +1,3 @@
-import cv2
-
-
 def get_line_orientation(line):
     x1, y1, x2, y2 = line
 

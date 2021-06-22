@@ -2,15 +2,15 @@ import image_processing.image_processing as ip
 from app import Application
 import time
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import QThread, Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QThread, Qt, pyqtSignal
 from PyQt5.QtWidgets import QApplication
 import cv2
 import sys
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QMainWindow
 from PyQt5.uic import loadUi
 import matplotlib
-import subprocess, os
+import subprocess
+import os
 matplotlib.use("Qt5Agg")
 
 FPS = 10
@@ -19,6 +19,7 @@ FILEPATH = os.path.abspath(__file__)
 difficulty = "Medium"
 first = "Player"
 start = False
+
 
 class MainThread(QThread):
     changePixmap = pyqtSignal(QImage)
@@ -92,12 +93,14 @@ class MainThread(QThread):
         Stop thread for safe exit of program.
         '''
         self.threadActive = False
-        self.sleep(1) # Allow for thread to safely exit.
+        # Allow for thread to safely exit.
+        self.sleep(1)
+
 
 class GUI(QMainWindow):
     def __init__(self, *args):
         QMainWindow.__init__(self)
-        window = loadUi("gui/TicTacToe.ui", self)
+        loadUi("gui/TicTacToe.ui", self)
         self.setWindowTitle("TicTacToeTwo")
         self.pushButton.clicked.connect(self.button)
 
@@ -121,7 +124,7 @@ class GUI(QMainWindow):
         global difficulty
         global first
 
-        if start == False:
+        if start is False:
             # Read values from boxes and start application.
             difficulty = self.comboBox.currentText()
             first = self.comboBox_2.currentText()
@@ -141,6 +144,7 @@ class GUI(QMainWindow):
             subprocess.Popen([sys.executable, FILEPATH])
             self.th.stop()
             sys.exit(0)
+
 
 if __name__ == "__main__":
     app = QApplication([])
