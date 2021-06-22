@@ -14,14 +14,8 @@ class Application:
         args = sys.argv
 
         # Choose AI difficulty.
-        if difficulty == "Easy":
-            diff = 1
-        elif difficulty == "Medium":
-            diff = 2
-        elif difficulty == "Hard":
-            diff = 3
 
-        self.diff = diff
+        self.diff = difficulty
 
         # Choose starting player.
         if first == 'Player':
@@ -34,7 +28,7 @@ class Application:
 
         if self.motion_detector.process_image(pre_image):
             print("Image has moved in last second, app locked")
-            return image
+            return
 
         # board, contour_image = ip.get_tictactoe_from_image(image)
         shapes = ip.get_shapes(pre_image)
@@ -53,19 +47,24 @@ class Application:
             return
 
         if self.ttt.legalMoveSet(board):
-            print("Legal move is set on the board:")
-            print_board(board)
+            self.ttt.printBoard()
+            if self.ttt.checkForWinner() in ["X", "O"]:
+                ai.result(self.ttt)
+                return True
             ai.aiMove(self.ttt, self.diff)
-            print("AFTER AI:")
-            print_board(board)
+            self.ttt.printBoard()
+            if self.ttt.checkForWinner() in ["X", "O"]:
+                ai.result(self.ttt)
+                return True
+
             return
 
 
-def print_board(board):
-    for y in range(3):
-        for x in range(3):
-            if board[y][x] is not None:
-                print(board[y][x], end="")
-            else:
-                print(" ", end="")
-        print()
+# def print_board(board):
+#     for y in range(3):
+#         for x in range(3):
+#             if board[y][x] is not None:
+#                 print(board[y][x], end="")
+#             else:
+#                 print(" ", end="")
+#         print()

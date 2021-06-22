@@ -44,8 +44,14 @@ class MainThread(QThread):
             self.set_image_in_gui(ret, frame)
             self.set_debug_image_in_gui(ret, frame)
 
-            contour_image = self.app.update(frame)
+            if self.app.update(frame):
+                self.threadActive = False
+
             # self.set_contour_image_in_gui(ret, contour_image)
+
+        self.sleep(5)
+        subprocess.Popen([sys.executable, FILEPATH])
+        sys.exit(0)
 
     def set_image_in_gui(self, ret, frame):
         if ret:
