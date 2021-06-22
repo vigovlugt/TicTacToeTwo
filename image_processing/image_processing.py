@@ -2,24 +2,103 @@ import cv2
 import numpy as np
 from PIL import Image
 import math
+import time
 
 
-def get_tictactoe_from_image(image):
-    preprocessed_image = preprocess_image(image)
+def get_board_lines(image: np.array, shapes: list,
+                    resize_factor: int = 1, threshold: int = 10,
+                    min_line: float = 0.3, max_gap: int = 30) -> list:
+    board_image = image.copy()
+
+    debug_image = np.zeros(image.shape)
+
+    for (shape, _, contour) in shapes:
+        if shape in ['X', 'O']:
+            cv2.drawContours(board_image, [contour], 0, 0, -1)
+
+    rf = resize_factor
+    w, h = image.shape
+    resized_image = board_image # cv2.resize(board_image, (w // rf, h // rf))
+    edges = cv2.Canny(resized_image, 75, 150)
+    lines = cv2.HoughLines(edges, 1, np.pi/180, 80)
+    print(threshold, max_gap, w * min_line)
+    print(lines)
+
+    # lines = [(x1 * rf, y1 * rf, x2 * rf, y2 * rf) for [(x1, y1, x2, y2)] in lines]
+    # for line in lines:
+    #     cv2.line(debug_image, line[:2], line[2:], np.random.randint(255), 10)
+
+    # lines = [x[0] for x in lines]
+    # if lines is not None:
+    #     for i in range(0, len(lines)):
+    #         print('x')
+    #         rho = lines[i][0][0]
+    #         theta = lines[i][0][1]
+    #         a = np.cos(theta)
+    #         b = np.sin(theta)
+    #         x0 = a*rho
+    #         y0 = b*rho
+    #         x1 = int(x0 + 1000*(-b))
+    #         y1 = int(y0 + 1000*(a))
+    #         x2 = int(x0 - 1000*(-b))
+    #         y2 = int(y0 - 1000*(a))
+
+
+    lines = [x[0] for x in lines]
+    approved = merge_lines(lines)
+    print('app:', len(approved), 'all:', len(lines))
+    # draw lines
+    for rho, theta in approved:
+
+        
+        # a = np.cos(theta)
+        # b = np.sin(theta)
+        # x0 = a*rho
+        # y0 = b*rho
+        # x1 = int(x0 + 1000*(-b))
+        # y1 = int(y0 + 1000*(a))
+        # x2 = int(x0 - 1000*(-b))
+        # y2 = int(y0 - 1000*(a))
+        cv2.line(debug_image, (x1, y1), (x2, y2), 255, 2)
+        print((x1, y1), (x2, y2))
+    image_show(debug_image)
+    time.sleep(5)
+
+    if len(lines) != 4:
+        return None
+
+    return [(x1 * rf, y1 * rf, x2 * rf, y2 * rf) for (x1, y1, x2, y2) in lines]
+
+
+def merge_lines(lines: list):
+
+    approved = []
+
+    for line in lines:
+        same = False
+        for i, check_line in enumerate(approved):
+            if (abs(check_line[0] - line[0]) < 30
+               and abs(check_line[1] - line[1]) < 0.15):
+                same = True
+                break
+        if not same:
+            approved.append(line)
+    return approved
+
+
+def image_show(im):
+    im_pil = Image.fromarray(im)
+    im_pil.show()
+
+
+def get_shapes(image):
+    shapes = []
 
     contours = cv2.findContours(
-        preprocessed_image.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0]
+        image.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0]
 
-    contour_image = image.copy()
-
-    field_image = preprocessed_image.copy()
-
-    # img_contours = np.zeros((100, 100))
-
-    shapes = []
     for contour in contours:
-        contour = cv2.approxPolyDP(
-            contour, 0.02 * cv2.arcLength(contour, True), True)
+
 
         area = cv2.contourArea(contour)
         hull = cv2.convexHull(contour)
@@ -30,7 +109,6 @@ def get_tictactoe_from_image(image):
         solidity = area / float(hullArea)
 
         shape = get_object_shape(solidity, contour)
-        # print(shape, solidity)
 
         middle = cv2.moments(contour)
         if middle["m00"] == 0 or middle["m00"] == 0:
@@ -40,109 +118,14 @@ def get_tictactoe_from_image(image):
         center_x = middle["m10"] / middle["m00"]
         center_y = middle["m01"] / middle["m00"]
 
-        if shape == "O":
-            shapes.append((shape, center_x, center_y))
-            # cv2.drawContours(contour_image, [contour], 0, (0, 0, 255), 3)
-            cv2.drawContours(field_image, [contour], 0, 0, 3)
-        elif shape == "X":
-            shapes.append((shape, center_x, center_y))
-            # cv2.drawContours(contour_image, [contour], 0, (0, 255, 0), 3)
-            cv2.drawContours(field_image, [contour], 0, 0, 3)
-        else:
-            pass
-            # cv2.drawContours(contour_image, [contour], 0, (255, 0, 0), 3)
+        shapes.append((shape, (center_x, center_y), contour))
 
-    resized_image = cv2.resize(field_image,
-                               (field_image.shape[0] // 5,
-                                field_image.shape[1] // 5))
-
-    edges = cv2.Canny(resized_image, 75, 150)
-    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 30,
-                            maxLineGap=300,
-                            minLineLength=resized_image.shape[0]/2)
-    print(lines)
-    if lines is None:
-        return None, contour_image
-
-    lines = [line[0] for line in lines]
-    new_lines = []
-
-    for line in lines:
-        x1, y1, x2, y2 = line
-        new_lines.append([x1, y1, x2, y2])
-        cv2.line(contour_image, (x1 * 5, y1 * 5),
-                                (x2 * 5, y2 * 5), (255, 255, 0), 10)
-
-    board = get_board(new_lines, shapes)
-
-    # image_show(contour_image)  # For testing
-    return board, contour_image
+    return shapes
 
 
-def get_line_orientation(line):
-    x1, y1, x2, y2 = line
-
-    if (x2-x1) == 0:
-        return "VERTICAL"
-
-    a = (y2-y1)/(x2-x1)
-    if a > 1 or a < -1:
-        return "VERTICAL"
-    return "HORIZONTAL"
-
-
-def get_line_average_x(line):
-    x1, y1, x2, y2 = line
-    return (x1 + x2) / 2
-
-
-def get_line_average_y(line):
-    x1, y1, x2, y2 = line
-    return (y1 + y2) / 2
-
-
-def get_relative_position(num, nums):
-    if num < nums[0]:
-        return 2
-    elif num > nums[0] and num < nums[1]:
-        return 1
-    elif num > nums[1]:
-        return 0
-
-
-def get_board(lines, shapes):
-    board = [[None, None, None], [None, None, None], [None, None, None]]
-
-    vertical_lines = [
-        line for line in lines if get_line_orientation(line) == "VERTICAL"]
-    horizontal_lines = [
-        line for line in lines if get_line_orientation(line) == "HORIZONTAL"]
-
-    if len(vertical_lines) != 2 or len(horizontal_lines) != 2:
-        return None
-
-    line_ys = sorted([get_line_average_y(line) for line in horizontal_lines])
-    line_xs = sorted([get_line_average_x(line) for line in vertical_lines])
-
-    for shape, x, y in shapes:
-        board_y = get_relative_position(y, line_ys)
-        board_x = 2 - get_relative_position(x, line_xs)
-        board[board_y][board_x] = shape
-
-    return board
-
-
-def print_board(board):
-    for y in range(3):
-        for x in range(3):
-            if board[y][x] is not None:
-                print(board[y][x], end="")
-            else:
-                print(" ", end="")
-        print()
-
-
-def get_object_shape(solidity, approx):
+def get_object_shape(solidity, contour, simplify=0.02):
+    approx = cv2.approxPolyDP(
+            contour, simplify * cv2.arcLength(contour, True), True)
     if len(approx) == 4:
         return "RECTANGLE"
     elif len(approx) > 15:
@@ -156,60 +139,9 @@ def get_object_shape(solidity, approx):
 def preprocess_image(image):
     gray_scale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blurred_image = cv2.GaussianBlur(gray_scale_image, (5, 5), 0)
-    threshold = np.bincount(gray_scale_image.flatten()).argmax() * 0.75
+    threshold = np.bincount(gray_scale_image.flatten()).argmax() * 0.5
     filtered_image = cv2.threshold(
         blurred_image, threshold, 255, cv2.THRESH_BINARY)[1]
     inverted_image = (255-filtered_image)
 
     return inverted_image
-
-
-def image_show(im):
-    im_pil = Image.fromarray(im)
-    im_pil.show()
-
-
-# class Line:
-#     start: tuple
-#     end: tuple
-
-#     def __init__(x1, y1, x2, y2):
-#         if y1 > y2:
-#             start = (x2, y2)
-#             end = (x1, y1)
-#         else:
-#             start = (x1, y1)
-#             end = (x2, y2)
-
-
-def same_line(line1, line2):
-    (x11, y11, x21, y21) = line1
-    rc_line1 = abs(y11 - y21) / abs(x11 - x21)
-
-    (x12, y12, x22, y22) = line2
-    rc_line2 = abs(y12 - y22) / abs(x12 - x22)
-
-    print(rc_line1, rc_line2, math.degrees(np.arctan(rc_line1)),
-          math.degrees(np.arctan(rc_line2)))
-
-
-def line_length(x1, y1, x2, y2):
-    return np.sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2))
-
-
-def merge_lines(lines):
-
-    confirmed_lines = []
-
-    for line in lines:
-        same_line(line, lines[0])
-    return lines
-
-
-def get_photo():
-    '''
-    Get photo from camera stream.
-    '''
-    image = cv2.imread("./image_processing/assets/4.png")  # For testing
-    image = cv2.resize(image, (800, 800))
-    return image

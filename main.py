@@ -38,14 +38,13 @@ class MainThread(QThread):
             time.sleep(1/FPS)
 
             ret, frame = cap.read()
-            frame = frame[100:380, 180:460]
+            frame = frame[:, 90:550]
 
             self.set_image_in_gui(ret, frame)
             self.set_debug_image_in_gui(ret, frame)
 
             contour_image = self.app.update(frame)
-
-            self.set_contour_image_in_gui(ret, contour_image)
+            # self.set_contour_image_in_gui(ret, contour_image)
 
     def set_image_in_gui(self, ret, frame):
         if ret:
