@@ -46,7 +46,7 @@ class Application:
 
         board = br.get_board(board_lines, shapes)
 
-        print(shapes, board_lines, board)
+        # print(board_lines, board)
 
         if board is None:
             print("No board detected")
@@ -54,8 +54,18 @@ class Application:
 
         if self.ttt.legalMoveSet(board):
             print("Legal move is set on the board:")
-            ip.print_board(board)
+            print_board(board)
             ai.aiMove(self.ttt, self.diff)
             print("AFTER AI:")
-            ip.print_board(board)
+            print_board(board)
             return
+
+
+def print_board(board):
+    for y in range(3):
+        for x in range(3):
+            if board[y][x] is not None:
+                print(board[y][x], end="")
+            else:
+                print(" ", end="")
+        print()

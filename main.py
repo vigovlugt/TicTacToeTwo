@@ -39,6 +39,7 @@ class MainThread(QThread):
 
             ret, frame = cap.read()
             frame = frame[:, 90:550]
+            frame = frame.copy()
 
             self.set_image_in_gui(ret, frame)
             self.set_debug_image_in_gui(ret, frame)

@@ -1,3 +1,6 @@
+import cv2
+
+
 def get_line_orientation(line):
     x1, y1, x2, y2 = line
 
@@ -43,12 +46,13 @@ def get_board(lines, shapes):
     line_ys = sorted([get_line_average_y(line) for line in horizontal_lines])
     line_xs = sorted([get_line_average_x(line) for line in vertical_lines])
 
-    for shape, (x, y) in shapes:
-        if shape != "O" or shape != "X":
+    for shape, (x, y), _ in shapes:
+        if shape != "O" and shape != "X":
             continue
 
         board_y = get_relative_position(y, line_ys)
         board_x = 2 - get_relative_position(x, line_xs)
+        # print(board_x, board_y)
         board[board_y][board_x] = shape
 
     return board

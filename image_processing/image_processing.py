@@ -6,68 +6,80 @@ import time
 
 
 def get_board_lines(image: np.array, shapes: list,
-                    resize_factor: int = 1, threshold: int = 10,
-                    min_line: float = 0.3, max_gap: int = 30) -> list:
-    board_image = image.copy()
+                    threshold: int = 10, min_line: float = 0.3,
+                    max_gap: int = 30) -> list:
 
+    board_image = image.copy()
     debug_image = np.zeros(image.shape)
 
     for (shape, _, contour) in shapes:
         if shape in ['X', 'O']:
-            cv2.drawContours(board_image, [contour], 0, 0, -1)
+            cv2.drawContours(board_image, [contour], 0, 120, -1)
+    # image_show(board_image)
+    # time.sleep(5)
 
-    rf = resize_factor
     w, h = image.shape
-    resized_image = board_image # cv2.resize(board_image, (w // rf, h // rf))
-    edges = cv2.Canny(resized_image, 75, 150)
-    lines = cv2.HoughLines(edges, 1, np.pi/180, 80)
-    print(threshold, max_gap, w * min_line)
-    print(lines)
-
-    # lines = [(x1 * rf, y1 * rf, x2 * rf, y2 * rf) for [(x1, y1, x2, y2)] in lines]
-    # for line in lines:
-    #     cv2.line(debug_image, line[:2], line[2:], np.random.randint(255), 10)
-
-    # lines = [x[0] for x in lines]
-    # if lines is not None:
-    #     for i in range(0, len(lines)):
-    #         print('x')
-    #         rho = lines[i][0][0]
-    #         theta = lines[i][0][1]
-    #         a = np.cos(theta)
-    #         b = np.sin(theta)
-    #         x0 = a*rho
-    #         y0 = b*rho
-    #         x1 = int(x0 + 1000*(-b))
-    #         y1 = int(y0 + 1000*(a))
-    #         x2 = int(x0 - 1000*(-b))
-    #         y2 = int(y0 - 1000*(a))
-
+    edges = cv2.Canny(board_image, 75, 150)
+    lines = cv2.HoughLines(edges, 1, np.pi/180, 60)
 
     lines = [x[0] for x in lines]
-    approved = merge_lines(lines)
-    print('app:', len(approved), 'all:', len(lines))
-    # draw lines
-    for rho, theta in approved:
+    math_lines = []
 
-        
-        # a = np.cos(theta)
-        # b = np.sin(theta)
-        # x0 = a*rho
-        # y0 = b*rho
-        # x1 = int(x0 + 1000*(-b))
-        # y1 = int(y0 + 1000*(a))
-        # x2 = int(x0 - 1000*(-b))
-        # y2 = int(y0 - 1000*(a))
-        cv2.line(debug_image, (x1, y1), (x2, y2), 255, 2)
-        print((x1, y1), (x2, y2))
-    image_show(debug_image)
-    time.sleep(5)
+    for rho, theta in lines:
 
-    if len(lines) != 4:
+        x1, y1, x2, y2 = polar_to_euclidian(rho, theta)
+        math_lines.append((x1, y1, x2, y2))
+        # print(x1, y1, x2, y2)
+        # cv2.line(debug_image, (x1, y1), (x2, y2), 120, 2)
+
+    approved = merge_lines(math_lines)
+    # print('app:', len(approved), 'all:', len(lines))
+
+
+    # for x1, y1, x2, y2 in approved:
+    #     cv2.line(debug_image, (x1, y1), (x2, y2), np.random.randint(200), 1)
+    #     print(x1, y1, x2, y2)
+
+    # image_show(debug_image)
+    # time.sleep(3)
+
+    if len(approved) != 4:
         return None
 
-    return [(x1 * rf, y1 * rf, x2 * rf, y2 * rf) for (x1, y1, x2, y2) in lines]
+    return approved
+
+
+def polar_to_euclidian(rho, theta):
+
+    if np.sin(theta) == 0.0:
+        theta = 0.01
+    a = rho / np.sin(theta)
+    b = -np.cos(theta) / np.sin(theta)
+
+    x1 = 0
+    y1 = a
+    x2 = 460
+    y2 = a + 460 * b
+
+    if y1 > 480:
+        y1 = 480
+        x1 = (480 - a) / b
+    elif y1 < 0:
+        y1 = 0
+        x1 = -a / b
+
+    if y2 > 480:
+        y2 = 480
+        x2 = (480 - a) / b
+    elif y2 < 0:
+        y2 = 0
+        x2 = -a / b
+
+    return int(x1), int(y1), int(x2), int(y2)
+
+
+def dist_point(x1, y1, x2, y2):
+    return np.sqrt(pow(x1-x2, 2) + pow(y1-y2, 2))
 
 
 def merge_lines(lines: list):
@@ -76,11 +88,14 @@ def merge_lines(lines: list):
 
     for line in lines:
         same = False
-        for i, check_line in enumerate(approved):
-            if (abs(check_line[0] - line[0]) < 30
-               and abs(check_line[1] - line[1]) < 0.15):
+        for check_line in approved:
+            if (dist_point(*line[:2], *check_line[:2]) < 40
+               and dist_point(*line[2:], *check_line[2:]) < 40):
                 same = True
-                break
+            if (dist_point(*line[2:], *check_line[:2]) < 40
+               and dist_point(*line[:2], *check_line[2:]) < 40):
+                same = True
+
         if not same:
             approved.append(line)
     return approved
@@ -98,7 +113,6 @@ def get_shapes(image):
         image.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0]
 
     for contour in contours:
-
 
         area = cv2.contourArea(contour)
         hull = cv2.convexHull(contour)
@@ -118,6 +132,7 @@ def get_shapes(image):
         center_x = middle["m10"] / middle["m00"]
         center_y = middle["m01"] / middle["m00"]
 
+        # print(shape, area)
         shapes.append((shape, (center_x, center_y), contour))
 
     return shapes
