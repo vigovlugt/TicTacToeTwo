@@ -47,7 +47,7 @@ class TicTacToe:
         '''
         Undo a move at given x and y coordinate.
         '''
-        self.board[y][x] = ' '
+        self.board[y][x] = None
 
     def possibleMoves(self):
         '''

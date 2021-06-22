@@ -189,11 +189,11 @@ def aiMove(ttt, diff):
     '''
     Plays move using AI determined by diff value given at start.
     '''
-    if diff == '1':
+    if diff == 'Easy':
         easy(ttt)
-    elif diff == '2':
+    elif diff == 'Medium':
         medium(ttt)
-    elif diff == '3':
+    elif diff == 'Hard':
         hard(ttt)
 
 
