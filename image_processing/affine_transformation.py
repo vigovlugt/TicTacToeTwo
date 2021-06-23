@@ -45,10 +45,17 @@ def get_affine_transform(lines, image, board):
 
     crosses = get_ai_crosses_on_board(board)
 
-    for cross in crosses:
-        nc = cv2.perspectiveTransform(cross, projective_matrix)[0]
-        cv2.line(image, tuple(nc[0]), tuple(nc[1]), (255, 0, 0), 3)
-        cv2.line(image, tuple(nc[2]), tuple(nc[3]), (255, 0, 0), 3)
+    # for cross in crosses:
+    #     nc = cv2.perspectiveTransform(cross, projective_matrix)[0]
+    #     cv2.line(image, tuple(nc[0]), tuple(nc[1]), (255, 0, 0), 3)
+    #     cv2.line(image, tuple(nc[2]), tuple(nc[3]), (255, 0, 0), 3)
+    for circle in crosses:
+        nc = cv2.perspectiveTransform(circle, projective_matrix)[0]
+        # print(circle)
+
+        # print(nc)
+
+        cv2.polylines(image, [nc.astype(np.int32)], True, (32, 32, 32), 3)
     # image_show(im)
     # time.sleep(10)
     return image
@@ -61,7 +68,7 @@ def image_show(im):
 
 def get_ai_crosses_on_board(board):
     crosses = []
-    base_cross = np.array([[[5, 5], [25, 25], [5, 25], [25, 5]]], np.float32)
+    # base_cross = np.array([[[5, 5], [25, 25], [5, 25], [25, 5]]], np.float32)
 
     for y in range(3):
         for x in range(3):
@@ -73,11 +80,17 @@ def get_ai_crosses_on_board(board):
             offset_x = 60 - x * 30
             offset_y = y * 30
 
-            new_cross = base_cross.copy()
-            for i in range(4):
+            new_cross = get_circle() # base_cross.copy()
+            for i in range(len(new_cross[0])):
                 new_cross[0][i][0] += offset_y
                 new_cross[0][i][1] += offset_x
 
             crosses.append(new_cross)
 
     return crosses
+
+
+def get_circle():
+    p = Point(15, 15)
+    circle = p.buffer(7.5)
+    return np.array([circle.exterior.coords])

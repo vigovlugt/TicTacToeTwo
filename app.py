@@ -12,6 +12,7 @@ class Application:
         self.ttt = TicTacToe()
         self.motion_detector = MotionDetection()
         self.game_finished = False
+        self.last_image = None
         # args = sys.argv
 
         # Choose AI difficulty.
@@ -23,13 +24,17 @@ class Application:
             self.ttt.start('X')
         elif first == 'AI':
             self.ttt.start('O')
+            ai.aiMove(self.ttt, self.diff)
 
     def update(self, image):
         pre_image = ip.preprocess_image(image)
 
         if self.motion_detector.process_image(pre_image):
             # print("Image has moved in last second, app locked")
-            return image
+            if self.last_image is None:
+                return image
+            else:
+                return self.last_image
 
         # board, contour_image = ip.get_tictactoe_from_image(image)
         shapes = ip.get_shapes(pre_image)
@@ -41,6 +46,7 @@ class Application:
 
         transformed = at.get_affine_transform(board_lines, image,
                                               self.ttt.board)
+        self.last_image = transformed
         board = br.get_board(board_lines, shapes)
 
         # print(board_lines, board)
@@ -52,13 +58,13 @@ class Application:
         try:
             if self.ttt.legalMoveSet(board):
                 self.ttt.printBoard()
-                if self.ttt.checkForWinner() in ["X", "O"]:
+                if self.ttt.checkForWinner() in ["X", "O", "tie"]:
                     ai.result(self.ttt)
                     self.game_finished = True
                 else:
                     ai.aiMove(self.ttt, self.diff)
                     self.ttt.printBoard()
-                    if self.ttt.checkForWinner() in ["X", "O"]:
+                    if self.ttt.checkForWinner() in ["X", "O", "tie"]:
                         ai.result(self.ttt)
                         self.game_finished = True
         except ValueError as e:
