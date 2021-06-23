@@ -1,6 +1,7 @@
 import random
-import tictactoe
 from copy import deepcopy
+# import tictactoe
+
 
 def easiest(ttt):
     '''
@@ -26,6 +27,7 @@ def easiest(ttt):
             worstMove = pos
 
     ttt.move(worstMove[0], worstMove[1])
+
 
 def easy(ttt):
     '''

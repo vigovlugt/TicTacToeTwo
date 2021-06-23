@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from PIL import Image
-import time
+# import time
 
 
 def get_board_lines(image: np.array, shapes: list,

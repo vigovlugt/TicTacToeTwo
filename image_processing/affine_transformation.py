@@ -1,18 +1,19 @@
 import cv2
 import numpy as np
 from PIL import Image
-import math
-import time
-import matplotlib.pyplot as plt
 from shapely.geometry import LineString
 from shapely.geometry import Point
+# import matplotlib.pyplot as plt
+# import math
+# import time
 
 
 def get_affine_transform(lines, image, board, detected_board):
 
     # if lines != 4:
     #     for line in lines:
-    #         cv2.line(image, tuple(line[2:]), tuple(line[:2]), (120, 0, 255), 3)
+    #         cv2.line(image, tuple(line[2:]), tuple(line[:2]),
+    #                 (120, 0, 255), 3)
     #     return image
     points = []
     lines = [[tuple(line[:2]), tuple(line[2:])] for line in lines]
@@ -32,16 +33,18 @@ def get_affine_transform(lines, image, board, detected_board):
 
     std_points = np.array([tl, tr, bl, br], np.float32)
     # print(image.shape)
-    # dest_points = np.array([[160, 153], [160, 306], [320, 153], [320, 306]], np.float32)
-    # dest_points = np.array([[160, 153], [160, 153], [320, 306], [320, 306]], np.float32)
-    dest_points = np.array([[30, 30], [30, 60], [60, 30], [60, 60]], np.float32)
+    # dest_points = np.array([[160, 153], [160, 306], [320, 153],
+    #                         [320, 306]], np.float32)
+    # dest_points = np.array([[160, 153], [160, 153], [320, 306],
+    #                         [320, 306]], np.float32)
+    dest_points = np.array([[30, 30], [30, 60], [60, 30],
+                            [60, 60]], np.float32)
 
     # print(std_points, dest_points)
     projective_matrix = cv2.getPerspectiveTransform(dest_points, std_points)
 
-    test_cross = np.array([[[5, 5], [25, 25], [5, 25], [25, 5]]], np.float32)
-
-    im = cv2.warpPerspective(image, projective_matrix, (480, 460))
+    # test_cross = np.array([[[5, 5], [25, 25], [5, 25], [25, 5]]], np.float32)
+    # im = cv2.warpPerspective(image, projective_matrix, (480, 460))
 
     shapes = get_ai_shapes_on_board(board, detected_board)
 
