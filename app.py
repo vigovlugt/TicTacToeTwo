@@ -44,8 +44,12 @@ class Application:
             print("No board lines detected")
             return image
 
-
         board = br.get_board(board_lines, shapes)
+
+        if board is None:
+            print("No board detected")
+            return image
+
         transformed = at.get_affine_transform(board_lines, image,
                                               self.ttt.board, board)
         self.last_image = transformed
@@ -53,9 +57,6 @@ class Application:
 
         # print(board_lines, board)
 
-        if board is None:
-            print("No board detected")
-            return transformed
 
         try:
             if self.ttt.legalMoveSet(board):
