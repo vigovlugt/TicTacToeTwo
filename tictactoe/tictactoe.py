@@ -47,7 +47,7 @@ class TicTacToe:
         '''
         Undo a move at given x and y coordinate.
         '''
-        self.board[y][x] = ' '
+        self.board[y][x] = None
 
     def possibleMoves(self):
         '''
@@ -57,7 +57,7 @@ class TicTacToe:
 
         for x in range(0, 3):
             for y in range(0, 3):
-                if self.board[x][y] == None:
+                if self.board[x][y] is None:
                     posMoves.append((y, x))
         return posMoves
 
@@ -79,7 +79,7 @@ class TicTacToe:
         '''
         for y in range(0, 3):
             for x in range(0, 3):
-                if board[y][x] == 'X' and self.board[y][x] == None:
+                if board[y][x] == 'X' and self.board[y][x] is None:
                     self.move(x, y)
                     return True
         return False
@@ -95,7 +95,7 @@ class TicTacToe:
                 [[self.board[i][2 - i] for i in range(3)]])
 
         for row in rows:
-            if row[0] == row[1] == row[2] != None:
+            if row[0] == row[1] == row[2] is not None:
                 # After move, turns change, so winner is last turns player.
                 if self.turn == 'O':
                     return 'X'

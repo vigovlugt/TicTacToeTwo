@@ -1,9 +1,9 @@
 from datetime import datetime
 import cv2
 
-# MOVED_THRESHOLD = 0.04
-MOVED_THRESHOLD = 0.1
-LOCKED_TIME = 1.0
+MOVED_THRESHOLD = 0.04
+# MOVED_THRESHOLD = 0.1
+LOCKED_TIME = 2.0
 # LOCKED_TIME = 0.5
 
 

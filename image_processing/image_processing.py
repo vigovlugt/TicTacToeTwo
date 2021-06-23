@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 from PIL import Image
-import math
 import time
 
 
@@ -10,17 +9,17 @@ def get_board_lines(image: np.array, shapes: list,
                     max_gap: int = 30) -> list:
 
     board_image = image.copy()
-    debug_image = np.zeros(image.shape)
+    # debug_image = np.zeros(image.shape)
 
     for (shape, _, contour) in shapes:
         if shape in ['X', 'O']:
-            cv2.drawContours(board_image, [contour], 0, 120, -1)
+            cv2.drawContours(board_image, [contour], 0, 0, -1)
     # image_show(board_image)
     # time.sleep(5)
 
     w, h = image.shape
     edges = cv2.Canny(board_image, 75, 150)
-    lines = cv2.HoughLines(edges, 1, np.pi/180, 60)
+    lines = cv2.HoughLines(edges, 1, np.pi/180, 50)
 
     if lines is None:
         return None
@@ -38,7 +37,6 @@ def get_board_lines(image: np.array, shapes: list,
     approved = merge_lines(math_lines)
     # print('app:', len(approved), 'all:', len(lines))
 
-
     # for x1, y1, x2, y2 in approved:
     #     cv2.line(debug_image, (x1, y1), (x2, y2), np.random.randint(200), 1)
     #     print(x1, y1, x2, y2)
@@ -47,7 +45,7 @@ def get_board_lines(image: np.array, shapes: list,
     # time.sleep(3)
 
     if len(approved) != 4:
-        return None
+        return approved
 
     return approved
 
@@ -91,27 +89,40 @@ def merge_lines(lines: list):
 
     for line in lines:
         same = False
-        for i, (check_line, f) in enumerate(approved):
+        for i, check_lines in enumerate(approved):
+            check_line = check_lines[0]
             if (dist_point(*line[:2], *check_line[:2]) < 40
                and dist_point(*line[2:], *check_line[2:]) < 40):
                 same = True
-
-                approved[i] = [(check_line[0] * f + line[0]) / (f + 1),
-                               (check_line[1] * f + line[1]) / (f + 1),
-                               (check_line[2] * f + line[2]) / (f + 1),
-                               (check_line[3] * f + line[3]) / (f + 1)], f + 1
+                approved[i].append(line)
+                break
 
             if (dist_point(*line[2:], *check_line[:2]) < 40
                and dist_point(*line[:2], *check_line[2:]) < 40):
-                approved[i] = [(check_line[0] * f + line[2]) / (f + 1),
-                               (check_line[1] * f + line[3]) / (f + 1),
-                               (check_line[2] * f + line[0]) / (f + 1),
-                               (check_line[3] * f + line[1]) / (f + 1)], f + 1
+                same = True
+                approved[i].append(tuple(line[2:] + line[:2]))
                 break
         if not same:
-            approved.append((line, 1))
+            approved.append([line])
+    merged = []
+    for lines in approved:
+        merged.append(calc_average_line(lines))
+    # print(len(merged))
+    return merged
 
-    return [x[0] for x in approved]
+
+def calc_average_line(lines):
+
+    def avg(x: list) -> int:
+        return int(sum(x) / len(x))
+
+    line = [], [], [], []
+    for x1, y1, x2, y2 in lines:
+        line[0].append(x1)
+        line[1].append(y1)
+        line[2].append(x2)
+        line[3].append(y2)
+    return avg(line[0]), avg(line[1]), avg(line[2]), avg(line[3])
 
 
 def image_show(im):
