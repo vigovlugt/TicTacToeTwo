@@ -49,17 +49,21 @@ class Application:
             print("No board detected")
             return transformed
 
-        if self.ttt.legalMoveSet(board):
-            self.ttt.printBoard()
-            if self.ttt.checkForWinner() in ["X", "O"]:
-                ai.result(self.ttt)
-                self.game_finished = True
-            else:
-                ai.aiMove(self.ttt, self.diff)
+        try:
+            if self.ttt.legalMoveSet(board):
                 self.ttt.printBoard()
                 if self.ttt.checkForWinner() in ["X", "O"]:
                     ai.result(self.ttt)
                     self.game_finished = True
+                else:
+                    ai.aiMove(self.ttt, self.diff)
+                    self.ttt.printBoard()
+                    if self.ttt.checkForWinner() in ["X", "O"]:
+                        ai.result(self.ttt)
+                        self.game_finished = True
+        except ValueError as e:
+            print(e)
+
         return transformed
 
 

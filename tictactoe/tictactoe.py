@@ -79,6 +79,10 @@ class TicTacToe:
         '''
         moves = []
 
+        print(board)
+        print(self.board)
+        print()
+
         for y in range(0, 3):
             for x in range(0, 3):
                 if board[y][x] and board[y][x] != self.turn and self.board[y][x] and self.board != self.turn:
