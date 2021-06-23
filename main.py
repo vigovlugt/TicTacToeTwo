@@ -120,6 +120,14 @@ class GUI(QMainWindow):
     def setContourImage(self, image):
         self.contour_image_display.setPixmap(QPixmap.fromImage(image))
 
+    def hide(self):
+        self.comboBox.hide()
+        self.comboBox_2.hide()
+        self.label.hide()
+        self.label_2.hide()
+        self.label_5.hide()
+        self.label_6.hide()
+
     def button(self):
         '''
         Executes when 'Start'/'Restart' button is clicked in UI. If button is
@@ -136,6 +144,7 @@ class GUI(QMainWindow):
             difficulty = self.comboBox.currentText()
             first = self.comboBox_2.currentText()
             self.pushButton.setText("Restart")
+            self.hide()
             start = True
 
             app = Application(difficulty, first)
