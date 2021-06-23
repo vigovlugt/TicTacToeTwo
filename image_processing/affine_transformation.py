@@ -63,13 +63,14 @@ def get_ai_crosses_on_board(board):
     crosses = []
     base_cross = np.array([[[5, 5], [25, 25], [5, 25], [25, 5]]], np.float32)
 
-    for x in range(3):
-        for y in range(3):
-            shape = board[y][x]
+    for y in range(3):
+        for x in range(3):
+            # print(board)
+            shape = board[x][y]
             if shape != "O":
                 continue
 
-            offset_x = x * 30
+            offset_x = 60 - x * 30
             offset_y = y * 30
 
             new_cross = base_cross.copy()

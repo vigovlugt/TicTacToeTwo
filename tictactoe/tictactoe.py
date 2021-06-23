@@ -32,7 +32,7 @@ class TicTacToe:
         print("\nTurn:", self.turn, end="\n\n")
         board = [[i if i else " " for i in j] for j in self.board]
         print("\n---+---+---\n".join([" " + " | ".join(row)
-                                      for row in board]))
+                                      for row in reversed(board)]))
 
     def move(self, x, y):
         '''

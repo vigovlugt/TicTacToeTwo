@@ -1,6 +1,7 @@
 import image_processing.image_processing as ip
 from app import Application
 import time
+import numpy as np
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QThread, Qt, pyqtSignal
 from PyQt5.QtWidgets import QApplication
@@ -40,6 +41,7 @@ class MainThread(QThread):
 
             ret, frame = cap.read()
             frame = frame[:, 90:550]
+            frame = np.flip(frame, (0, 1))
             frame = frame.copy()
 
             self.set_image_in_gui(ret, frame)
