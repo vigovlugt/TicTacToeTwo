@@ -97,6 +97,7 @@ class MainThread(QThread):
             p = convertToQtFormat.scaled(h, w, Qt.KeepAspectRatio)
             self.changeContourPixmap.emit(p)
 
+
 class GUI(QMainWindow):
     def __init__(self, *args):
         QMainWindow.__init__(self)

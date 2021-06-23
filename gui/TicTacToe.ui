@@ -43,6 +43,16 @@
           <height>25</height>
          </size>
         </property>
+        <property name="font">
+         <font>
+          <family>Ubuntu</family>
+         </font>
+        </property>
+        <item>
+         <property name="text">
+          <string>Easiest</string>
+         </property>
+        </item>
         <item>
          <property name="text">
           <string>Easy</string>
@@ -156,7 +166,11 @@
          <widget class="QLabel" name="image_display"/>
         </item>
         <item>
-         <widget class="QLabel" name="debug_image_display"/>
+         <widget class="QLabel" name="debug_image_display">
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="contour_image_display"/>

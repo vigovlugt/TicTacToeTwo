@@ -1,4 +1,7 @@
 def get_line_orientation(line):
+    '''
+    Gets line orientation, returns "VERTICAL" or "HORIZONTAL".
+    '''
     x1, y1, x2, y2 = line
 
     if (x2-x1) == 0:
@@ -11,16 +14,25 @@ def get_line_orientation(line):
 
 
 def get_line_average_x(line):
+    '''
+    Gets the average of line x, returns one line.
+    '''
     x1, y1, x2, y2 = line
     return (x1 + x2) / 2
 
 
 def get_line_average_y(line):
+    '''
+    Gets the average of line y, returns one line.
+    '''
     x1, y1, x2, y2 = line
     return (y1 + y2) / 2
 
 
 def get_relative_position(num, nums):
+    '''
+    Gets relative position between two lines.
+    '''
     if num < nums[0]:
         return 2
     elif num > nums[0] and num < nums[1]:
@@ -30,6 +42,9 @@ def get_relative_position(num, nums):
 
 
 def get_board(lines, shapes):
+    '''
+    Gets the board and all of its values, returns the board.
+    '''
     board = [[None, None, None], [None, None, None], [None, None, None]]
 
     vertical_lines = [

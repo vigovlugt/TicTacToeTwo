@@ -4,7 +4,7 @@ import image_processing.image_processing as ip
 import image_processing.affine_transformation as at
 import image_processing.board_recognition as br
 from motion_detection.motion_detection import MotionDetection
-import sys
+# import sys
 
 
 class Application:
@@ -30,7 +30,7 @@ class Application:
         pre_image = ip.preprocess_image(image)
 
         if self.motion_detector.process_image(pre_image):
-            # print("Image has moved in last second, app locked")
+            print("Image has moved in last second, app locked")
             if self.last_image is None:
                 return image
             else:
@@ -53,7 +53,6 @@ class Application:
         transformed = at.get_affine_transform(board_lines, image,
                                               self.ttt.board, board)
         self.last_image = transformed
-        
 
         # print(board_lines, board)
 
@@ -74,14 +73,3 @@ class Application:
             print(e)
 
         return transformed
-
-
-
-# def print_board(board):
-#     for y in range(3):
-#         for x in range(3):
-#             if board[y][x] is not None:
-#                 print(board[y][x], end="")
-#             else:
-#                 print(" ", end="")
-#         print()

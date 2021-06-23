@@ -1,6 +1,32 @@
 import random
-import tictactoe
 from copy import deepcopy
+# import tictactoe
+
+
+def easiest(ttt):
+    '''
+    Easiest difficulty AI. Always chooses the worst move possible.
+    '''
+    bestScore = 2
+    worstMove = 0
+
+    posMoves = ttt.possibleMoves()
+
+    # Empty board, so edge move is worst move, no need for algorithm.
+    if len(posMoves) == 9:
+        ttt.move(1, 0)
+        return
+
+    for pos in posMoves:
+        tttcopy = deepcopy(ttt)
+        tttcopy.move(int(pos[0]), int(pos[1]))
+        score = minimax(tttcopy, False)
+        tttcopy.undo(int(pos[0]), int(pos[1]))
+        if score < bestScore:
+            bestScore = score
+            worstMove = pos
+
+    ttt.move(worstMove[0], worstMove[1])
 
 
 def easy(ttt):
@@ -189,7 +215,9 @@ def aiMove(ttt, diff):
     '''
     Plays move using AI determined by diff value given at start.
     '''
-    if diff == 'Easy':
+    if diff == 'Easiest':
+        easiest(ttt)
+    elif diff == 'Easy':
         easy(ttt)
     elif diff == 'Medium':
         medium(ttt)
@@ -207,43 +235,3 @@ def result(ttt):
         print("\nYou lose.")
     else:
         print("\nTie game.")
-
-
-def main():
-    '''
-    Contains configuration for AI difficulty and who goes first. Then
-    enters game loop until winner or tie is determined.
-    '''
-    ttt = tictactoe.TicTacToe()
-
-    # Choose AI difficulty.
-    diff = input("\nChoose AI difficulty (1: Easy, 2: Medium, 3: Hard): ")
-    while diff != '1' and diff != '2' and diff != '3':
-        diff = input("Please try again (1: Easy, 2: Medium, 3: Hard): ")
-
-    # Choose starting player.
-    first = input("Go first? [y/n]: ").lower()
-    while first != 'y' and first != 'n':
-        first = input("Please try again [y/n]: ").lower()
-
-    if first == 'y':
-        ttt.start('X')
-    elif first == 'n':
-        ttt.start('O')
-
-    # Game loop.
-    while ttt.checkForWinner() is None:
-        ttt.printBoard()
-        if ttt.turn == 'X':
-            while playerMove(ttt) == -1:
-                playerMove(ttt)
-        else:
-            aiMove(ttt, diff)
-
-    # Print final board and show result.
-    ttt.printBoard()
-    result(ttt)
-
-
-if __name__ == '__main__':
-    main()
