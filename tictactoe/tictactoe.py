@@ -77,11 +77,25 @@ class TicTacToe:
         '''
         Checks if one legal move is set and executes this move if so.
         '''
+        moves = []
+
+        print(board)
+        print(self.board)
+        print()
+
         for y in range(0, 3):
             for x in range(0, 3):
-                if board[y][x] == 'X' and self.board[y][x] is None:
-                    self.move(x, y)
-                    return True
+                if board[y][x] and board[y][x] != self.turn and self.board[y][x] and self.board != self.turn:
+                    raise ValueError("Misplaced computer set")
+                if board[y][x] == self.turn and self.board[y][x] is None:
+                    moves.append((x, y))
+
+        if len(moves) > 1:
+            raise ValueError("Too much sets", moves)
+        elif len(moves) == 1:
+            x, y = moves[0]
+            self.move(x, y)
+
         return False
 
     def checkForWinner(self):
