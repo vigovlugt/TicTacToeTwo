@@ -59,9 +59,9 @@ class MainThread(QThread):
 
             # self.set_contour_image_in_gui(ret, contour_image)
 
-        self.sleep(5)
+        # Open new proces and quit current app.
         subprocess.Popen([sys.executable, FILEPATH])
-        sys.exit(0)
+        app.quit()
 
     def set_image_in_gui(self, ret, frame):
         if ret:
@@ -97,15 +97,6 @@ class MainThread(QThread):
             p = convertToQtFormat.scaled(h, w, Qt.KeepAspectRatio)
             self.changeContourPixmap.emit(p)
 
-    def stop(self):
-        '''
-        Stop thread for safe exit of program.
-        '''
-        self.threadActive = False
-        # Allow for thread to safely exit.
-        self.sleep(1)
-
-
 class GUI(QMainWindow):
     def __init__(self, *args):
         QMainWindow.__init__(self)
@@ -123,6 +114,9 @@ class GUI(QMainWindow):
         self.contour_image_display.setPixmap(QPixmap.fromImage(image))
 
     def hide(self):
+        '''
+        Hide options from GUI when game has started.
+        '''
         self.comboBox.hide()
         self.comboBox_2.hide()
         self.label.hide()
@@ -158,10 +152,8 @@ class GUI(QMainWindow):
 
             self.th.start()
         else:
-            # Open new subprocess, stop thread and exit.
-            subprocess.Popen([sys.executable, FILEPATH])
-            self.th.stop()
-            sys.exit(0)
+            # Break out of update loop.
+            self.th.threadActive = False
 
 
 if __name__ == "__main__":
