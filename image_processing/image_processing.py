@@ -141,8 +141,7 @@ def get_shapes(image):
         area = cv2.contourArea(contour)
         hull = cv2.convexHull(contour)
         hullArea = cv2.contourArea(hull)
-
-        if hullArea == 0:
+        if area < 100:
             continue
         solidity = area / float(hullArea)
 

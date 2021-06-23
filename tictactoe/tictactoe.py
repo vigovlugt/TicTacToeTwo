@@ -32,7 +32,7 @@ class TicTacToe:
         print("\nTurn:", self.turn, end="\n\n")
         board = [[i if i else " " for i in j] for j in self.board]
         print("\n---+---+---\n".join([" " + " | ".join(row)
-                                      for row in board]))
+                                      for row in reversed(board)]))
 
     def move(self, x, y):
         '''
@@ -79,13 +79,13 @@ class TicTacToe:
         '''
         moves = []
 
-        print(board)
-        print(self.board)
-        print()
+        # print(board)
+        # print(self.board)
+        # print()
 
         for y in range(0, 3):
             for x in range(0, 3):
-                if board[y][x] and board[y][x] != self.turn and self.board[y][x] and self.board != self.turn:
+                if board[y][x] and board[y][x] != self.turn and not self.board[y][x]:
                     raise ValueError("Misplaced computer set")
                 if board[y][x] == self.turn and self.board[y][x] is None:
                     moves.append((x, y))
@@ -95,7 +95,7 @@ class TicTacToe:
         elif len(moves) == 1:
             x, y = moves[0]
             self.move(x, y)
-
+            return True
         return False
 
     def checkForWinner(self):
