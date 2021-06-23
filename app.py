@@ -71,12 +71,3 @@ class Application:
             print(e)
 
         return transformed
-
-# def print_board(board):
-#     for y in range(3):
-#         for x in range(3):
-#             if board[y][x] is not None:
-#                 print(board[y][x], end="")
-#             else:
-#                 print(" ", end="")
-#         print()
