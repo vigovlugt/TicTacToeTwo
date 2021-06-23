@@ -22,6 +22,9 @@ def get_board_lines(image: np.array, shapes: list,
     edges = cv2.Canny(board_image, 75, 150)
     lines = cv2.HoughLines(edges, 1, np.pi/180, 60)
 
+    if lines is None:
+        return None
+
     lines = [x[0] for x in lines]
     math_lines = []
 
@@ -88,17 +91,27 @@ def merge_lines(lines: list):
 
     for line in lines:
         same = False
-        for check_line in approved:
+        for i, (check_line, f) in enumerate(approved):
             if (dist_point(*line[:2], *check_line[:2]) < 40
                and dist_point(*line[2:], *check_line[2:]) < 40):
                 same = True
+
+                approved[i] = [(check_line[0] * f + line[0]) / (f + 1),
+                               (check_line[1] * f + line[1]) / (f + 1),
+                               (check_line[2] * f + line[2]) / (f + 1),
+                               (check_line[3] * f + line[3]) / (f + 1)], f + 1
+
             if (dist_point(*line[2:], *check_line[:2]) < 40
                and dist_point(*line[:2], *check_line[2:]) < 40):
-                same = True
-
+                approved[i] = [(check_line[0] * f + line[2]) / (f + 1),
+                               (check_line[1] * f + line[3]) / (f + 1),
+                               (check_line[2] * f + line[0]) / (f + 1),
+                               (check_line[3] * f + line[1]) / (f + 1)], f + 1
+                break
         if not same:
-            approved.append(line)
-    return approved
+            approved.append((line, 1))
+
+    return [x[0] for x in approved]
 
 
 def image_show(im):
