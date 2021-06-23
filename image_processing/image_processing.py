@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from PIL import Image
+import time
 
 
 def get_board_lines(image: np.array, shapes: list,
@@ -12,13 +13,16 @@ def get_board_lines(image: np.array, shapes: list,
 
     for (shape, _, contour) in shapes:
         if shape in ['X', 'O']:
-            cv2.drawContours(board_image, [contour], 0, 120, -1)
+            cv2.drawContours(board_image, [contour], 0, 0, -1)
     # image_show(board_image)
     # time.sleep(5)
 
     w, h = image.shape
     edges = cv2.Canny(board_image, 75, 150)
-    lines = cv2.HoughLines(edges, 1, np.pi/180, 60)
+    lines = cv2.HoughLines(edges, 1, np.pi/180, 50)
+
+    if lines is None:
+        return None
 
     lines = [x[0] for x in lines]
     math_lines = []
@@ -41,7 +45,7 @@ def get_board_lines(image: np.array, shapes: list,
     # time.sleep(3)
 
     if len(approved) != 4:
-        return None
+        return approved
 
     return approved
 
@@ -85,17 +89,40 @@ def merge_lines(lines: list):
 
     for line in lines:
         same = False
-        for check_line in approved:
+        for i, check_lines in enumerate(approved):
+            check_line = check_lines[0]
             if (dist_point(*line[:2], *check_line[:2]) < 40
                and dist_point(*line[2:], *check_line[2:]) < 40):
                 same = True
+                approved[i].append(line)
+                break
+
             if (dist_point(*line[2:], *check_line[:2]) < 40
                and dist_point(*line[:2], *check_line[2:]) < 40):
                 same = True
-
+                approved[i].append(tuple(line[2:] + line[:2]))
+                break
         if not same:
-            approved.append(line)
-    return approved
+            approved.append([line])
+    merged = []
+    for lines in approved:
+        merged.append(calc_average_line(lines))
+    # print(len(merged))
+    return merged
+
+
+def calc_average_line(lines):
+
+    def avg(x: list) -> int:
+        return int(sum(x) / len(x))
+
+    line = [], [], [], []
+    for x1, y1, x2, y2 in lines:
+        line[0].append(x1)
+        line[1].append(y1)
+        line[2].append(x2)
+        line[3].append(y2)
+    return avg(line[0]), avg(line[1]), avg(line[2]), avg(line[3])
 
 
 def image_show(im):

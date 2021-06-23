@@ -45,7 +45,14 @@ class MainThread(QThread):
             self.set_image_in_gui(ret, frame)
             self.set_debug_image_in_gui(ret, frame)
 
-            if self.app.update(frame):
+            affined_image = self.app.update(frame)
+            # if affined_image is None:
+            #     affined_image = frame
+            if affined_image is None:
+                affined_image = frame
+            self.set_contour_image_in_gui(ret, affined_image)
+
+            if self.app.game_finished:
                 self.threadActive = False
 
             # self.set_contour_image_in_gui(ret, contour_image)

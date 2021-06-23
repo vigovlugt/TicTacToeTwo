@@ -1,6 +1,7 @@
 from tictactoe import ai
 from tictactoe.tictactoe import TicTacToe
 import image_processing.image_processing as ip
+import image_processing.affine_transformation as at
 import image_processing.board_recognition as br
 from motion_detection.motion_detection import MotionDetection
 import sys
@@ -10,8 +11,8 @@ class Application:
     def __init__(self, difficulty, first):
         self.ttt = TicTacToe()
         self.motion_detector = MotionDetection()
-
-        args = sys.argv
+        self.game_finished = False
+        # args = sys.argv
 
         # Choose AI difficulty.
 
@@ -27,8 +28,8 @@ class Application:
         pre_image = ip.preprocess_image(image)
 
         if self.motion_detector.process_image(pre_image):
-            print("Image has moved in last second, app locked")
-            return
+            # print("Image has moved in last second, app locked")
+            return image
 
         # board, contour_image = ip.get_tictactoe_from_image(image)
         shapes = ip.get_shapes(pre_image)
@@ -36,28 +37,31 @@ class Application:
         board_lines = ip.get_board_lines(pre_image, shapes)
         if board_lines is None:
             print("No board lines detected")
-            return
+            return image
 
+        transformed = at.get_affine_transform(board_lines, image,
+                                              self.ttt.board)
         board = br.get_board(board_lines, shapes)
 
         # print(board_lines, board)
 
         if board is None:
             print("No board detected")
-            return
+            return transformed
 
         if self.ttt.legalMoveSet(board):
             self.ttt.printBoard()
             if self.ttt.checkForWinner() in ["X", "O"]:
                 ai.result(self.ttt)
-                return True
-            ai.aiMove(self.ttt, self.diff)
-            self.ttt.printBoard()
-            if self.ttt.checkForWinner() in ["X", "O"]:
-                ai.result(self.ttt)
-                return True
+                self.game_finished = True
+            else:
+                ai.aiMove(self.ttt, self.diff)
+                self.ttt.printBoard()
+                if self.ttt.checkForWinner() in ["X", "O"]:
+                    ai.result(self.ttt)
+                    self.game_finished = True
+        return transformed
 
-            return
 
 
 # def print_board(board):
