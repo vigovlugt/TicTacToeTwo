@@ -44,10 +44,12 @@ class Application:
             print("No board lines detected")
             return image
 
-        transformed = at.get_affine_transform(board_lines, image,
-                                              self.ttt.board)
-        self.last_image = transformed
+
         board = br.get_board(board_lines, shapes)
+        transformed = at.get_affine_transform(board_lines, image,
+                                              self.ttt.board, board)
+        self.last_image = transformed
+        
 
         # print(board_lines, board)
 

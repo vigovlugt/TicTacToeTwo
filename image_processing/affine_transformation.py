@@ -8,7 +8,7 @@ from shapely.geometry import LineString
 from shapely.geometry import Point
 
 
-def get_affine_transform(lines, image, board):
+def get_affine_transform(lines, image, board, detected_board):
 
     # if lines != 4:
     #     for line in lines:
@@ -43,21 +43,20 @@ def get_affine_transform(lines, image, board):
 
     im = cv2.warpPerspective(image, projective_matrix, (480, 460))
 
-    crosses = get_ai_crosses_on_board(board)
+    shapes = get_ai_shapes_on_board(board, detected_board)
 
     # for cross in crosses:
     #     nc = cv2.perspectiveTransform(cross, projective_matrix)[0]
-    #     cv2.line(image, tuple(nc[0]), tuple(nc[1]), (255, 0, 0), 3)
-    #     cv2.line(image, tuple(nc[2]), tuple(nc[3]), (255, 0, 0), 3)
-    for circle in crosses:
-        nc = cv2.perspectiveTransform(circle, projective_matrix)[0]
-        # print(circle)
+    #
+    for shape, poly in shapes:
+        nc = cv2.perspectiveTransform(poly, projective_matrix)[0]
 
-        # print(nc)
+        if shape == 'X':
+            cv2.line(image, tuple(nc[0]), tuple(nc[1]), (32, 32, 32), 3)
+            cv2.line(image, tuple(nc[2]), tuple(nc[3]), (32, 32, 32), 3)
+        elif shape == 'O':
+            cv2.polylines(image, [nc.astype(np.int32)], True, (32, 32, 32), 3)
 
-        cv2.polylines(image, [nc.astype(np.int32)], True, (32, 32, 32), 3)
-    # image_show(im)
-    # time.sleep(10)
     return image
 
 
@@ -66,28 +65,38 @@ def image_show(im):
     im_pil.show()
 
 
-def get_ai_crosses_on_board(board):
-    crosses = []
-    # base_cross = np.array([[[5, 5], [25, 25], [5, 25], [25, 5]]], np.float32)
+def get_ai_shapes_on_board(board, detected_board):
+    shapes = []
 
     for y in range(3):
         for x in range(3):
-            # print(board)
             shape = board[x][y]
-            if shape != "O":
+            detected_shape = detected_board[x][y]
+
+            if detected_shape == shape:
+                continue
+
+            if shape == "O":
+                poly = get_circle()
+            elif shape == "X":
+                poly = get_cross()
+            else:
                 continue
 
             offset_x = 60 - x * 30
             offset_y = y * 30
 
-            new_cross = get_circle() # base_cross.copy()
-            for i in range(len(new_cross[0])):
-                new_cross[0][i][0] += offset_y
-                new_cross[0][i][1] += offset_x
+            for i in range(len(poly[0])):
+                poly[0][i][0] += offset_y
+                poly[0][i][1] += offset_x
 
-            crosses.append(new_cross)
+            shapes.append((shape, poly))
 
-    return crosses
+    return shapes
+
+
+def get_cross():
+    return np.array([[[10, 10], [20, 20], [10, 20], [20, 10]]], np.float32)
 
 
 def get_circle():
