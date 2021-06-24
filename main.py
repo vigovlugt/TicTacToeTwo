@@ -194,7 +194,7 @@ class GUI(QMainWindow):
             self.th.threadActive = False
             subprocess.Popen([sys.executable, FILEPATH])
             # Allow thread to finish execution.
-            time.sleep(0.5)
+            time.sleep(0.1)
             sys.exit(0)
 
     def showResult(self, result):
@@ -207,15 +207,13 @@ class GUI(QMainWindow):
 
         if result == "X":
             self.label.setText("You win!")
-            self.label.show()
         elif result == "O":
             self.label.setText("You lost.")
-            self.label.show()
         elif result == "tie":
             self.label.setText("Tie game.")
-            self.label.show()
 
         self.label_2.setText("Press 'Restart' to play again.")
+        self.label.show()
         self.label_2.show()
 
 if __name__ == "__main__":
