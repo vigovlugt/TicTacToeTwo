@@ -1,6 +1,17 @@
+'''
+Names: J. Boon, F. Hoetjes, J. Siegers, V. Vlugt & L. van der Waals
+MM_Group: 3
+Study: BSc Informatica
+tictactoe.py:
+    - This program sets up a tictactoe game.
+    - It provides a move based on the current state of the board.
+    - It checks wether the move set was legal.
+    - This program also checks if a player has won and ends the game
+      accordingly.
+'''
+
 from random import choice
 
-from PIL.Image import NONE
 import numpy
 
 PLAYERS = ["X", "O"]
@@ -85,7 +96,8 @@ class TicTacToe:
 
         for y in range(0, 3):
             for x in range(0, 3):
-                if board[y][x] and board[y][x] != self.turn and not self.board[y][x]:
+                if (board[y][x] and board[y][x] != self.turn
+                        and not self.board[y][x]):
                     raise ValueError("Misplaced computer set")
                 if board[y][x] == self.turn and self.board[y][x] is None:
                     moves.append((x, y))

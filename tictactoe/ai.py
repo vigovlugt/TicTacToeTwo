@@ -1,3 +1,16 @@
+'''
+Names: J. Boon, F. Hoetjes, J. Siegers, V. Vlugt & L. van der Waals
+MM_Group: 3
+Study: BSc Informatica
+ai.py:
+    - This program sets up an ai for the tictactoe game.
+    - This AI exists of four different levels: "easiest", "easy", "medium" and
+      "hard".
+    - Each level has its own algorithm with which the AI's moves are being
+      decided.
+    - This program also prints the results of the game, wether you win or lose.
+'''
+
 import random
 from copy import deepcopy
 # import tictactoe

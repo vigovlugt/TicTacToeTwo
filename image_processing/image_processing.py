@@ -1,3 +1,16 @@
+'''
+Names: J. Boon, F. Hoetjes, J. Siegers, V. Vlugt & L. van der Waals
+MM_Group: 3
+Study: BSc Informatica
+image_processing.py:
+    - This program does all the image recognition of the app.
+    - It gets the shapes and board lines of the image.
+    - It gets the average of the board lines and merges them into one line,
+      this way the playing field is being represented using only 4 lines.
+    - To decide what shape is what, it utilizes the solidity of the contours
+      drawn around the shapes, if the solidity is high its an 'O', if low: 'X'.
+'''
+
 import cv2
 import numpy as np
 from PIL import Image
@@ -7,6 +20,9 @@ from PIL import Image
 def get_board_lines(image: np.array, shapes: list,
                     threshold: int = 10, min_line: float = 0.3,
                     max_gap: int = 30) -> list:
+    '''
+    Gets all the lines out of the image that make up the board.
+    '''
 
     board_image = image.copy()
     # debug_image = np.zeros(image.shape)
@@ -51,6 +67,11 @@ def get_board_lines(image: np.array, shapes: list,
 
 
 def polar_to_euclidian(rho, theta):
+    '''
+    Converts the coordinates from polar to euclidian using rho and theta. Also
+    makes sure all the drawn lines stay between the borders of the image
+    through filtering.
+    '''
 
     if np.sin(theta) == 0.0:
         theta = 0.01
@@ -80,11 +101,19 @@ def polar_to_euclidian(rho, theta):
 
 
 def dist_point(x1, y1, x2, y2):
+    '''
+    Returns the distance between two points.
+    '''
     return np.sqrt(pow(x1-x2, 2) + pow(y1-y2, 2))
 
 
 def merge_lines(lines: list):
+    '''
+    Merges all the lines that have a certain amount of pixels (threshold)
+    seperating them.
+    '''
 
+    # All the lines that fit the threshold get added to the approved list.
     approved = []
 
     for line in lines:
@@ -104,6 +133,7 @@ def merge_lines(lines: list):
                 break
         if not same:
             approved.append([line])
+    # List containing all the merged lines.
     merged = []
     for lines in approved:
         merged.append(calc_average_line(lines))
@@ -112,6 +142,9 @@ def merge_lines(lines: list):
 
 
 def calc_average_line(lines):
+    '''
+    Get the average line from a array of lines.
+    '''
 
     def avg(x: list) -> int:
         return int(sum(x) / len(x))
@@ -126,11 +159,20 @@ def calc_average_line(lines):
 
 
 def image_show(im):
+    '''
+    Helper function which shows the image on the screen.
+    Useful for debugging.
+    '''
     im_pil = Image.fromarray(im)
     im_pil.show()
 
 
 def get_shapes(image):
+    '''
+    Detect all shapes in an image, returns a list of tuples with
+    information about shape type, x and y position.
+    '''
+
     shapes = []
 
     contours = cv2.findContours(
@@ -162,6 +204,9 @@ def get_shapes(image):
 
 
 def get_object_shape(solidity, contour, simplify=0.02):
+    '''
+    Gets object shape by looking at the solidity of the contour.
+    '''
     approx = cv2.approxPolyDP(
             contour, simplify * cv2.arcLength(contour, True), True)
     if len(approx) == 4:
@@ -175,6 +220,10 @@ def get_object_shape(solidity, contour, simplify=0.02):
 
 
 def preprocess_image(image):
+    '''
+    Preprocess image to make it easier to detect shapes and lines.
+    Creates a binary image from an RGB image.
+    '''
     gray_scale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blurred_image = cv2.GaussianBlur(gray_scale_image, (5, 5), 0)
     threshold = np.bincount(gray_scale_image.flatten()).argmax() * 0.5
