@@ -31,7 +31,7 @@ class Application:
         '''
         self.ttt = TicTacToe()
         self.motion_detector = MotionDetection()
-        self.game_finished = False
+        self.game_finished = None
         self.last_image = None
         # args = sys.argv
 
@@ -86,13 +86,13 @@ class Application:
                 self.ttt.printBoard()
                 if self.ttt.checkForWinner() in ["X", "O", "tie"]:
                     ai.result(self.ttt)
-                    self.game_finished = True
+                    self.game_finished = self.ttt.checkForWinner()
                 else:
                     ai.aiMove(self.ttt, self.diff)
                     self.ttt.printBoard()
                     if self.ttt.checkForWinner() in ["X", "O", "tie"]:
                         ai.result(self.ttt)
-                        self.game_finished = True
+                        self.game_finished = self.ttt.checkForWinner()
         except ValueError as e:
             print(e)
 

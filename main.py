@@ -40,6 +40,7 @@ class MainThread(QThread):
     changePixmap = pyqtSignal(QImage)
     changeDebugPixmap = pyqtSignal(QImage)
     changeContourPixmap = pyqtSignal(QImage)
+    gameResult = pyqtSignal(str)
 
     def __init__(self, qt_instance, app):
         super().__init__(qt_instance)
@@ -73,14 +74,14 @@ class MainThread(QThread):
                 affined_image = frame
             self.set_contour_image_in_gui(ret, affined_image)
 
-            if self.app.game_finished:
+            # Exit loop when game is finished
+            if self.app.game_finished is not None:
                 self.threadActive = False
-
             # self.set_contour_image_in_gui(ret, contour_image)
 
-        # Open new proces and quit current app.
-        subprocess.Popen([sys.executable, FILEPATH])
-        app.quit()
+        # If game has a result, then show result in GUI.
+        if self.app.game_finished is not None:
+            self.gameResult.emit(self.app.game_finished)
 
     def set_image_in_gui(self, ret, frame):
         '''
@@ -172,7 +173,7 @@ class GUI(QMainWindow):
         global first
 
         if start is False:
-            # Read values from boxes and start application.
+            # Executes when button contains 'Start'.
             difficulty = self.comboBox.currentText()
             first = self.comboBox_2.currentText()
             self.pushButton.setText("Restart")
@@ -185,12 +186,37 @@ class GUI(QMainWindow):
             self.th.changePixmap.connect(self.setImage)
             self.th.changeDebugPixmap.connect(self.setDebugImage)
             self.th.changeContourPixmap.connect(self.setContourImage)
+            self.th.gameResult.connect(self.showResult)
 
             self.th.start()
         else:
-            # Break out of update loop.
+            # Executes when button contains 'Restart'.
             self.th.threadActive = False
+            subprocess.Popen([sys.executable, FILEPATH])
+            # Allow thread to finish execution.
+            time.sleep(0.5)
+            sys.exit(0)
 
+    def showResult(self, result):
+        '''
+        Updates GUI to show the results of game.
+        '''
+        self.image_display.hide()
+        self.debug_image_display.hide()
+        self.contour_image_display.hide()
+
+        if result == "X":
+            self.label.setText("You win!")
+            self.label.show()
+        elif result == "O":
+            self.label.setText("You lost.")
+            self.label.show()
+        elif result == "tie":
+            self.label.setText("Tie game.")
+            self.label.show()
+
+        self.label_2.setText("Press 'Restart' to play again.")
+        self.label_2.show()
 
 if __name__ == "__main__":
     app = QApplication([])
