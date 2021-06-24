@@ -151,7 +151,7 @@ def hard(ttt):
         return
 
     # Copy board, try move, recursively finish game and determine score.
-    # Best scoring move gets played.
+    # Best scoring move is played.
     for pos in posMoves:
         tttcopy = deepcopy(ttt)
         tttcopy.move(int(pos[0]), int(pos[1]))
