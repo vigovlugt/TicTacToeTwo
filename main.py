@@ -1,3 +1,13 @@
+'''
+Names: J. Boon, F. Hoetjes, J. Siegers, V. Vlugt & L. van der Waals
+MM_Group: 3
+Study: BSc Informatica
+main.py:
+    - Acts as the main, in which the application itself can be executed.
+    - Contains the GUI and all of its features
+    - Manages the webcam and all the images which are used in the GUI.
+'''
+
 import image_processing.image_processing as ip
 from app import Application
 import time
@@ -23,6 +33,10 @@ start = False
 
 
 class MainThread(QThread):
+    '''
+    Main thread which manages webcam and images in GUI.
+    '''
+
     changePixmap = pyqtSignal(QImage)
     changeDebugPixmap = pyqtSignal(QImage)
     changeContourPixmap = pyqtSignal(QImage)
@@ -33,6 +47,11 @@ class MainThread(QThread):
         self.threadActive = True
 
     def run(self):
+        '''
+        Main run function, sets up main loop and captures image from webcam
+        every loop. Gets output images from app and displays it in GUI.
+        '''
+
         # Setup video capture source
         cap = cv2.VideoCapture(0)
 
@@ -64,6 +83,9 @@ class MainThread(QThread):
         app.quit()
 
     def set_image_in_gui(self, ret, frame):
+        '''
+        Sets the main image in the GUI (the camera).
+        '''
         if ret:
             h, w, ch = frame.shape
             rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -75,6 +97,10 @@ class MainThread(QThread):
             self.changePixmap.emit(p)
 
     def set_debug_image_in_gui(self, ret, frame):
+        '''
+        Sets the preprocessed debug image in the GUI.
+        '''
+
         im = ip.preprocess_image(frame)
 
         if ret:
@@ -87,6 +113,10 @@ class MainThread(QThread):
             self.changeDebugPixmap.emit(p)
 
     def set_contour_image_in_gui(self, ret, frame):
+        '''
+        Sets the transformed output image in the GUI.
+        '''
+
         if ret:
             h, w, ch = frame.shape
             rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -99,6 +129,11 @@ class MainThread(QThread):
 
 
 class GUI(QMainWindow):
+    '''
+    This class manages loading the PyQTwindows and binds to components from
+    PyQT
+    '''
+
     def __init__(self, *args):
         QMainWindow.__init__(self)
         loadUi("gui/TicTacToe.ui", self)

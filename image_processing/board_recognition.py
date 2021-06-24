@@ -1,3 +1,15 @@
+'''
+Names: J. Boon, F. Hoetjes, J. Siegers, V. Vlugt & L. van der Waals
+MM_Group: 3
+Study: BSc Informatica
+board_recognition.py:
+    - This program detects the lines which make up the board.
+    - It also detects all shapes (circles and crosses) on the board.
+    - It then returns a 2-dimensional array with O, X or None in the cells
+      which represents the board.
+'''
+
+
 def get_line_orientation(line):
     '''
     Gets line orientation, returns "VERTICAL" or "HORIZONTAL".

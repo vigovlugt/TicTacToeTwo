@@ -1,14 +1,29 @@
+'''
+Names: J. Boon, F. Hoetjes, J. Siegers, V. Vlugt & L. van der Waals
+MM_Group: 3
+Study: BSc Informatica
+affine_transformation.py:
+    - This program uses an affine transformation to get the correct perspective
+      of the shapes that will be drawn on the visual playing field.
+    - It also draws these shapes on the visual playing field accordingly.
+    - If a player removes his move from the board, this program will make sure
+      it is still visible on the visual playing field.
+'''
+
 import cv2
 import numpy as np
 from PIL import Image
 from shapely.geometry import LineString
 from shapely.geometry import Point
-# import matplotlib.pyplot as plt
-# import math
-# import time
 
 
 def get_affine_transform(lines, image, board, detected_board):
+    '''
+    This method returns an image with all shapes not present on the
+    physical paper in the image. If the image is rotated or not straight,
+    this method transforms the projected shapes to that rotation and then
+    draws the shape on the image.
+    '''
 
     # if lines != 4:
     #     for line in lines:
@@ -64,11 +79,21 @@ def get_affine_transform(lines, image, board, detected_board):
 
 
 def image_show(im):
+    '''
+    Helper function which shows the image on the screen.
+    Useful for debugging.
+    '''
     im_pil = Image.fromarray(im)
     im_pil.show()
 
 
 def get_ai_shapes_on_board(board, detected_board):
+    '''
+    Returns an array of circles and crosses which exists in
+    the digital board but not on the physical board.
+    If the computer has put a O in cell 1-1, this O is represented
+    as a polygon with the correct coordinates in the array this method returns.
+    '''
     shapes = []
 
     for y in range(3):
@@ -99,10 +124,16 @@ def get_ai_shapes_on_board(board, detected_board):
 
 
 def get_cross():
+    '''
+    Get an array with the two lines which represent a cross.
+    '''
     return np.array([[[10, 10], [20, 20], [10, 20], [20, 10]]], np.float32)
 
 
 def get_circle():
+    '''
+    Get a polygon of a circle with radius 7.5 at position 15, 15
+    '''
     p = Point(15, 15)
     circle = p.buffer(7.5)
     return np.array([circle.exterior.coords])
