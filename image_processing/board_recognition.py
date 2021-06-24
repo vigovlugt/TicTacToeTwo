@@ -76,7 +76,6 @@ def get_board(lines, shapes):
 
         board_y = get_relative_position(y, line_ys)
         board_x = 2 - get_relative_position(x, line_xs)
-        # print(board_x, board_y)
         board[board_y][board_x] = shape
 
     return board

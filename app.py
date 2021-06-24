@@ -16,7 +16,6 @@ import image_processing.image_processing as ip
 import image_processing.affine_transformation as at
 import image_processing.board_recognition as br
 from motion_detection.motion_detection import MotionDetection
-# import sys
 
 
 class Application:
@@ -33,10 +32,8 @@ class Application:
         self.motion_detector = MotionDetection()
         self.game_finished = None
         self.last_image = None
-        # args = sys.argv
 
         # Choose AI difficulty.
-
         self.diff = difficulty
 
         # Choose starting player.
@@ -57,31 +54,24 @@ class Application:
 
         if self.motion_detector.process_image(pre_image):
             print("Image has moved in last second, app locked")
-            if self.last_image is None:
-                return image
-            else:
-                return self.last_image
+            return self.image_error(image)
 
-        # board, contour_image = ip.get_tictactoe_from_image(image)
         shapes = ip.get_shapes(pre_image)
 
         board_lines = ip.get_board_lines(pre_image, shapes)
         if board_lines is None:
             print("No board lines detected")
-            return image
+            return self.image_error(image)
 
         board = br.get_board(board_lines, shapes)
 
         if board is None:
             print("No board detected")
-            return image
+            return self.image_error(image)
 
         transformed = at.get_affine_transform(board_lines, image,
                                               self.ttt.board, board)
         self.last_image = transformed
-
-        # print(board_lines, board)
-
 
         try:
             if self.ttt.legalMoveSet(board):
@@ -99,3 +89,9 @@ class Application:
             print(e)
 
         return transformed
+
+    def image_error(self, image):
+        if self.last_image is None:
+            return image
+        else:
+            return self.last_image

@@ -68,8 +68,6 @@ class MainThread(QThread):
             self.set_debug_image_in_gui(ret, frame)
 
             affined_image = self.app.update(frame)
-            # if affined_image is None:
-            #     affined_image = frame
             if affined_image is None:
                 affined_image = frame
             self.set_contour_image_in_gui(ret, affined_image)
@@ -77,7 +75,6 @@ class MainThread(QThread):
             # Exit loop when game is finished
             if self.app.game_finished is not None:
                 self.threadActive = False
-            # self.set_contour_image_in_gui(ret, contour_image)
 
         # If game has a result, then show result in GUI.
         if self.app.game_finished is not None:
@@ -140,6 +137,7 @@ class GUI(QMainWindow):
         loadUi("gui/TicTacToe.ui", self)
         self.setWindowTitle("TicTacToeTwo")
         self.pushButton.clicked.connect(self.button)
+        self.comboBox.setCurrentText('Easy')
 
     def setImage(self, image):
         self.image_display.setPixmap(QPixmap.fromImage(image))
@@ -215,6 +213,7 @@ class GUI(QMainWindow):
         self.label_2.setText("Press 'Restart' to play again.")
         self.label.show()
         self.label_2.show()
+
 
 if __name__ == "__main__":
     app = QApplication([])

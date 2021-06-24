@@ -13,8 +13,6 @@ image_processing.py:
 
 import cv2
 import numpy as np
-from PIL import Image
-# import time
 
 
 def get_board_lines(image: np.array, shapes: list,
@@ -25,13 +23,10 @@ def get_board_lines(image: np.array, shapes: list,
     '''
 
     board_image = image.copy()
-    # debug_image = np.zeros(image.shape)
 
     for (shape, _, contour) in shapes:
         if shape in ['X', 'O']:
             cv2.drawContours(board_image, [contour], 0, 0, -1)
-    # image_show(board_image)
-    # time.sleep(5)
 
     w, h = image.shape
     edges = cv2.Canny(board_image, 75, 150)
@@ -47,18 +42,8 @@ def get_board_lines(image: np.array, shapes: list,
 
         x1, y1, x2, y2 = polar_to_euclidian(rho, theta)
         math_lines.append((x1, y1, x2, y2))
-        # print(x1, y1, x2, y2)
-        # cv2.line(debug_image, (x1, y1), (x2, y2), 120, 2)
 
     approved = merge_lines(math_lines)
-    # print('app:', len(approved), 'all:', len(lines))
-
-    # for x1, y1, x2, y2 in approved:
-    #     cv2.line(debug_image, (x1, y1), (x2, y2), np.random.randint(200), 1)
-    #     print(x1, y1, x2, y2)
-
-    # image_show(debug_image)
-    # time.sleep(3)
 
     if len(approved) != 4:
         return approved
@@ -137,7 +122,6 @@ def merge_lines(lines: list):
     merged = []
     for lines in approved:
         merged.append(calc_average_line(lines))
-    # print(len(merged))
     return merged
 
 
@@ -156,15 +140,6 @@ def calc_average_line(lines):
         line[2].append(x2)
         line[3].append(y2)
     return avg(line[0]), avg(line[1]), avg(line[2]), avg(line[3])
-
-
-def image_show(im):
-    '''
-    Helper function which shows the image on the screen.
-    Useful for debugging.
-    '''
-    im_pil = Image.fromarray(im)
-    im_pil.show()
 
 
 def get_shapes(image):
@@ -191,13 +166,12 @@ def get_shapes(image):
 
         middle = cv2.moments(contour)
         if middle["m00"] == 0 or middle["m00"] == 0:
-            # print("WARN: zero division error")
+            print("WARN: zero division error")
             continue
 
         center_x = middle["m10"] / middle["m00"]
         center_y = middle["m01"] / middle["m00"]
 
-        # print(shape, area)
         shapes.append((shape, (center_x, center_y), contour))
 
     return shapes

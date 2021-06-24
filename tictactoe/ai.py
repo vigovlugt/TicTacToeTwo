@@ -13,7 +13,6 @@ ai.py:
 
 import random
 from copy import deepcopy
-# import tictactoe
 
 
 def easiest(ttt):
